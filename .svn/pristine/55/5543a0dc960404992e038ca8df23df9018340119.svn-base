@@ -1,0 +1,21 @@
+$(document).ready(function() {
+    $.formValidator.initConfig({theme:"126",formID:"regform1",validatorgroup:"1",
+        onSuccess:function(){
+            $("#regform1").submit();
+        },
+        onError:function(msg) {
+           alert(msg);
+        },
+        submitAfterAjaxPrompt : '有数据正在异步验证，请稍等...'
+    });
+
+    $("#userPsd").formValidator({validatorgroup:"1",onShowFixText:"请输入密码",onShow:"请输入密码",onFocus:"至少6个长度",onCorrect:"密码合法"}).inputValidator({min:6,max:16,empty:{leftEmpty:false,rightEmpty:false,emptyError:"密码两边不能有空符号"},onError:"密码长度错误,请确认"}).passwordValidator({compareID:"userName"});
+    $("#reuserPsd").formValidator({validatorgroup:"1",onShowFixText:"请再次输入密码",onShow:"输再次输入密码",onFocus:"至少1个长度",onCorrect:" "}).inputValidator({min:1,empty:{leftEmpty:false,rightEmpty:false,emptyError:"重复密码两边不能有空符号"},onError:"重复密码不能为空,请确认"}).compareValidator({desID:"userPsd",operateor:"=",onError:"2次密码不一致,请确认"});
+
+    $("#userRealName").formValidator({validatorgroup:"1",onShowFixText:"长度为1-20个字符。"}).inputValidator({min:1,max:20,onError:"真实姓名的长度不正确,请确认"});
+    $("#userCity").formValidator({validatorgroup:"1",onShowFixText:"长度为1-20个字符。"}).inputValidator({min:1,max:20,onError:"答长度不正确,请确认"});
+    $("#userPostalcode").formValidator({validatorgroup:"1",onShowFixText:"长度为6个字符。"}).inputValidator({min:6,max:6,onError:"邮编长度不正确,请确认"}).regexValidator({regExp:"^[0-9]*$",onError:"邮编只能是数字"});
+});
+
+
+

@@ -1,0 +1,129 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ page import="com.opensymphony.xwork2.ActionContext" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=7"/>
+    <title> QuickKnowledge </title>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <link rel="Shortcut Icon" href="../images/favicon.ico">
+    <link rel="stylesheet" href="../css/cutter.css">
+
+    <script src="../js/jquery-1.3.2.min.js" ></script>
+    <script src="../js/cutter.js" ></script>
+    <script src="../js/placeholder2.js" ></script>
+    <script src="../js/selectBar.js" ></script>
+</head>
+
+
+<%
+    ////登陆 验证
+    User u = (User) ActionContext.getContext().getSession().get("msg");
+    if (u == null) {
+        response.sendRedirect("/index.action");
+    }
+%>
+
+<body>
+<%@ include file="../static/header.jsp"%>
+<div class="wrapper">
+    <div class="row">
+        <jsp:include page="../static/left.jsp"></jsp:include>
+
+        <script type="text/javascript">
+            function aa()
+            {
+                selectLeft(3,4);//选择坐标菜单
+            }
+            window.onload = aa;
+
+            function deleteRfp(rfpId)
+            {
+                var isC = window.confirm("确认删除？");
+                if(isC)
+                {
+                    jQuery.ajax({
+                        type : 'post',
+                        url : '/ajax/deleteRfp.action',
+                        processData:true,
+                        async : true,
+                        dataType : 'html',
+                        data:{id:rfpId},
+                        success : function(data) {
+                            data = jQuery.parseJSON(data);
+                            if(data.status == 1)
+                            {
+                                alert("删除成功");
+                                location.reload();
+                            }
+                            else{
+                                alert("修改失败"+data.status);
+                            }
+                        },
+                        error : function() {
+                            alert("服务器繁忙中！稍后再试！");
+                        }
+                    });
+                }
+            }
+        </script>
+        <div class="seven"  id="centerArea">
+
+            <table style="font-size: 15px">
+                <tr>
+                    <th>标题</th>
+                    <th>发布人</th>
+                    <th>发布时间</th>
+                    <th>操作</th>
+                </tr>
+                <c:forEach var="item" items="${list}">
+                    <tr>
+                        <td class="titleListtd">
+                            <a href="/rfp/get.action?id=${item.rfpInfoId}" >${item.rfpInfoTitle}</a>
+                        </td>
+                        <td>
+                            <span class="content_attach">${item.userName}</span>
+                        </td>
+                        <td>
+                            <span class="content_attach">${item.rfpInfoPosted}</span>
+                        </td>
+                        <td>
+                            <span>
+                                <c:choose>
+                                    <c:when test="${msg.id==item.userId}">
+                                        <a href="/rfp/editRfp.action?id=${item.rfpInfoId}" class="button">编辑</a>
+                                        <a href="javaScript:void(0)" onClick="deleteRfp(${item.rfpInfoId});" class="button">删除</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="/rfp/get.action?id=${item.rfpInfoId}" class="button">评论</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </span>
+                        </td>
+                    </tr>
+
+                </c:forEach>
+
+            </table>
+
+
+            <div class="foot" style="float: right;margin: 30px">
+                <div class="right">
+                    <div class="pager">
+                        ${pageTools}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <s:action name="right" namespace="/static" executeResult="true">
+        </s:action>
+    </div>
+</div>
+
+<%@ include file="../static/footer.jsp"%>
+</body>
+</html>

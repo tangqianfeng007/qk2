@@ -1,0 +1,406 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.qk.bean.*;
+import com.qk.common.Page;
+import com.qk.common.PageTool;
+import com.qk.common.Tools;
+import com.qk.dao.*;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.json.annotations.JSON;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: zheng
+ * Date: 13-8-8
+ * Time: 下午7:31
+ * To change this template use File | Settings | File Templates.
+ */
+public class RFPAction extends ActionSupport {
+    private int status = -3;
+    private int id;
+    private RfpInfoBean rfpInfoBean;
+    private String content;//新增评论时的 评论内容
+    private VirtualTeamBean virtualTeamBean;//团队信息
+    private int pageNumber = 1; //pageNumber代表是哪一页
+    private int pageSize = 10;  //pageSize代表一页中显示多少条数据
+    private List<RfpInfoBean> list = null;
+    private List<RfpInfoCommentBean> commentList; //评论
+    private String pageTools = null;
+
+
+    /**
+     * 获取RFP招标的详细信息rfpInfoBean，包括对招标的评论commentList
+     *
+     * @return
+     */
+    public String get() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        if (id > 0) {
+            rfpInfoBean = DaoFactory.rfpInfoDao.infoFindById(id);
+            RfpInfoCommentDao rfpInfoCommentDao = DaoFactory.rfpInfoCommentDao;
+
+            int count = rfpInfoCommentDao.getCount(id);
+            List<RfpInfoCommentBean> list = rfpInfoCommentDao.getRfpInfoCommentList(pageNumber, 6, id);
+            Page page = new Page(pageNumber, count, 6, list);
+            PageTool pt = new PageTool();
+            this.pageTools = pt.getPageStringForjs("/ajax/RFPCommentPage.action", page);
+            this.commentList = page.getResult();
+            dealComment();
+        }
+        return SUCCESS;
+    }
+
+    /**
+     * 获取RFP 列表
+     *
+     * @return
+     */
+    public String getRfpInfoList() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        int count = DaoFactory.rfpInfoDao.getCount();
+        list = DaoFactory.rfpInfoDao.getList(pageNumber, pageSize);
+
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        pageTools = pt.getPageString("/RFP/getRfpInfoList.action", page);
+        return SUCCESS;
+    }
+
+    /**
+     * 获取自己的RFP 列表
+     *
+     * @return
+     */
+    public String getMyRfpInfoList() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        int count = DaoFactory.rfpInfoDao.getMyCount(user.getId());
+        list = DaoFactory.rfpInfoDao.getMyList(user.getId(), pageNumber, pageSize);
+
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        pageTools = pt.getPageString("/RFP/getRfpInfoList.action", page);
+        return SUCCESS;
+    }
+
+    /**
+     * 删除rfp
+     *
+     * @return
+     */
+    public String deleteRfp() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        if (id > 0) {
+            status = DaoFactory.rfpInfoDao.deleteRfp(id);
+        } else {
+            status = -1;
+        }
+        return SUCCESS;
+    }
+
+    /**
+     * ajax 请求评论分页
+     *
+     * @return
+     */
+    public String RFPCommentPage() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        RfpInfoCommentDao rfpInfoCommentDao = DaoFactory.rfpInfoCommentDao;
+        int count = rfpInfoCommentDao.getCount(id);
+        List<RfpInfoCommentBean> list = rfpInfoCommentDao.getRfpInfoCommentList(pageNumber, 6, id);
+        Page page = new Page(pageNumber, count, 6, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("/ajax/RFPCommentPage.action", page);
+        this.commentList = page.getResult();
+        dealComment();
+        return SUCCESS;
+    }
+
+    /**
+     * ajax 对新评论进行保存
+     *
+     * @return
+     */
+    public String respondRFPComment() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        if (user != null) {
+            RfpInfoCommentDao rfpInfoCommentDao = DaoFactory.rfpInfoCommentDao;
+            boolean flag = false;
+            RfpInfoCommentBean rfpInfoCommentBean = new RfpInfoCommentBean();
+
+            rfpInfoCommentBean.setRfpInfoId(id);
+            rfpInfoCommentBean.setRicContent(content);
+            rfpInfoCommentBean.setRicPosted(Tools.getNowDate());
+            rfpInfoCommentBean.setRicRemark("备注");
+            rfpInfoCommentBean.setUserId(user.getId());
+            flag = rfpInfoCommentDao.insert(rfpInfoCommentBean);
+
+            int count = rfpInfoCommentDao.getCount(id);
+            List<RfpInfoCommentBean> list = rfpInfoCommentDao.getRfpInfoCommentList(pageNumber, 6, id);
+            Page page = new Page(pageNumber, count, 6, list);
+            PageTool pt = new PageTool();
+            this.pageTools = pt.getPageStringForjs("/ajax/RFPCommentPage.action", page);
+            this.commentList = page.getResult();
+            dealComment();
+        }
+
+        return SUCCESS;
+    }
+
+    //
+
+    /**
+     * 处理评论人员是否已经被就爱如到团队中
+     */
+    private void dealComment() {
+        VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+        ArrayList<VtMemberBean> memberList;//团队成员
+        Map<String, Object> map = virtualTeamDao.getByRfpId(id);
+        status = (Integer) (map.get("status"));
+        memberList = (ArrayList) (map.get("memberList"));
+        virtualTeamBean = (VirtualTeamBean) (map.get("virtualTeamBean"));
+        if (virtualTeamBean.getVtId() != null && virtualTeamBean.getVtId() > 0)//这个RFP已经成立团队
+        {
+            if (memberList.size() > 0)//并且团队中有成员
+            {
+                for (RfpInfoCommentBean commentBean : this.commentList) {
+                    int ss = 0;
+                    for (VtMemberBean member : memberList) {
+                        if (commentBean.getUserId().equals(member.getUserId())) {
+                            ss = 1;
+                            break;
+                        }
+                    }
+                    commentBean.setStatus(ss);
+                }
+            }
+        }
+    }
+
+    public String addRfp() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
+
+        return SUCCESS;
+    }
+
+    public String doAddRfp() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
+
+        if (rfpInfoBean.getRfpInfoTitle() != null || rfpInfoBean.getRfpInfoTitle() != "") {
+            rfpInfoBean.setRfpInfoPosted(Tools.getNowDate());
+            rfpInfoBean.setUserId(user.getId());
+
+            RfpInfoDao rfpInfoDao = DaoFactory.rfpInfoDao;
+            status = rfpInfoDao.addRfp(rfpInfoBean);
+        }
+        return SUCCESS;
+    }
+
+    public String editRfp() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
+        if (id > 0) {
+            rfpInfoBean = DaoFactory.rfpInfoDao.infoFindById(id);
+        }
+        return SUCCESS;
+    }
+
+    public String doEditRfp() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        if (user == null) {
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
+
+        if (rfpInfoBean.getRfpInfoId() != null || rfpInfoBean.getRfpInfoId() > 0) {
+            rfpInfoBean.setUserId(user.getId());
+
+            RfpInfoDao rfpInfoDao = DaoFactory.rfpInfoDao;
+            status = rfpInfoDao.updateRfp(rfpInfoBean);
+        }
+        return SUCCESS;
+    }
+
+    @JSON(serialize = false)
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public List<RfpInfoCommentBean> getCommentList() {
+        return commentList;
+    }
+
+    public void setCommentList(List<RfpInfoCommentBean> commentList) {
+        this.commentList = commentList;
+    }
+
+    @JSON(serialize = false)
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    @JSON(serialize = false)
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getPageTools() {
+        return pageTools;
+    }
+
+    public void setPageTools(String pageTools) {
+        this.pageTools = pageTools;
+    }
+
+    public RfpInfoBean getRfpInfoBean() {
+        return rfpInfoBean;
+    }
+
+    public void setRfpInfoBean(RfpInfoBean rfpInfoBean) {
+        this.rfpInfoBean = rfpInfoBean;
+    }
+
+    @JSON(serialize = false)
+    public List<RfpInfoBean> getList() {
+        return list;
+    }
+
+    public void setList(List<RfpInfoBean> list) {
+        this.list = list;
+    }
+
+    @JSON(serialize = false)
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public VirtualTeamBean getVirtualTeamBean() {
+        return virtualTeamBean;
+    }
+
+    public void setVirtualTeamBean(VirtualTeamBean virtualTeamBean) {
+        this.virtualTeamBean = virtualTeamBean;
+    }
+}

@@ -1,0 +1,35 @@
+package com.qk.bean;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-2
+ * Time: 下午8:17
+ * To change this template use File | Settings | File Templates.
+ */
+public class LogBean {
+
+    private String username;
+
+    private String password;
+
+    public LogBean() {
+
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}

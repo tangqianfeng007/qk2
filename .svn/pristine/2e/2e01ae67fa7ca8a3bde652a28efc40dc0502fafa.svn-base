@@ -1,0 +1,142 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.qk.bean.CallforbitBean;
+import com.qk.bean.CfbCommentBean;
+import com.qk.bean.EnterpriseCommentBean;
+import com.qk.bean.User;
+import com.qk.common.Page;
+import com.qk.common.PageTool;
+import com.qk.common.Tools;
+import com.qk.dao.CallforbitDao;
+import com.qk.dao.CfbCommentDao;
+import com.qk.dao.DaoFactory;
+import com.qk.dao.EnterpriseCommentDao;
+import org.apache.struts2.ServletActionContext;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 招标列表
+ */
+public class EnterpriseToExpertsComment extends ActionSupport {
+
+    /**
+     * pageNumber代表是哪一页
+     * pageSize代表一页中显示多少条数据
+     */
+    private int id;
+    private User user;
+    private int pageNumber=1;
+    private int pageSize=6;
+    private String pageTools=null;
+    private List<EnterpriseCommentBean> lists=null;
+    private String content=null;
+
+    public String commentsList(){
+        user = DaoFactory.userDao.infoFindById(id);
+        EnterpriseCommentDao enterpriseCommentDao= DaoFactory.enterpriseCommentDao;
+        int count=enterpriseCommentDao.getEnterpriseCommentBeanCount(id);
+        List<EnterpriseCommentBean> list=enterpriseCommentDao.getEnterpriseCommentByUserID(pageNumber, 6, id);
+        Page page = new Page(pageNumber, count, 6, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("#", page);
+        this.lists=page.getResult();
+        return "commentsAllList";
+    }
+
+    public String seeComments(){
+        EnterpriseCommentDao enterpriseCommentDao= DaoFactory.enterpriseCommentDao;
+        int count=enterpriseCommentDao.getEnterpriseCommentBeanCount(id);
+        List<EnterpriseCommentBean> list=enterpriseCommentDao.getEnterpriseCommentByUserID(pageNumber, 6, id);
+        Page page = new Page(pageNumber, count, 6, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("#", page);
+        this.lists=page.getResult();
+        return "seeComments";
+    }
+
+    public String  commentsExperts(){
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+
+        Integer num=0;
+        EnterpriseCommentDao enterpriseCommentDao= DaoFactory.enterpriseCommentDao;
+        EnterpriseCommentBean enterpriseCommentBean=new EnterpriseCommentBean();
+        enterpriseCommentBean.setEcEnterpriseId(user.getId());
+        enterpriseCommentBean.setEcExpertsId(id);
+        enterpriseCommentBean.setEcContent(content);
+        enterpriseCommentBean.setEcPosted(Tools.getNowDate());
+        enterpriseCommentBean.setEcTitle("标题");
+        enterpriseCommentBean.setEcRamark("备注");
+
+        num=enterpriseCommentDao.insertEnterpriseComment(enterpriseCommentBean);
+
+        int count=enterpriseCommentDao.getEnterpriseCommentBeanCount(id);
+        List<EnterpriseCommentBean> list=enterpriseCommentDao.getEnterpriseCommentByUserID(pageNumber, 6, id);
+        Page page = new Page(pageNumber, count, 6, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("#", page);
+        this.lists=page.getResult();
+        return "commentsExperts";
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getPageTools() {
+        return pageTools;
+    }
+
+    public void setPageTools(String pageTools) {
+        this.pageTools = pageTools;
+    }
+
+    public List<EnterpriseCommentBean> getLists() {
+        return lists;
+    }
+
+    public void setLists(List<EnterpriseCommentBean> lists) {
+        this.lists = lists;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+}

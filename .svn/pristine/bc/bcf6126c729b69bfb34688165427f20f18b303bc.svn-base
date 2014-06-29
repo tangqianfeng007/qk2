@@ -1,0 +1,231 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: zheng
+  Date: 13-8-10
+  Time: 上午10:46
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <script src="/js/jquery-1.3.2.min.js" ></script>
+    <link rel="stylesheet" href="/css/cutter.css">
+    <script type="text/javascript">
+        function exchangeTr(obj)
+        {
+            var myTr = $(obj).parent().parent();
+            var inTable = $("#inTable");
+            var outTable = $("#outTable");
+            var bvalue = $(obj).html();
+            if(bvalue == "添加")
+            {
+                $(obj).html("删除");
+                $(inTable).append("<tr>"+(myTr).html()+"</tr>");
+            }
+            else if(bvalue == "删除")
+            {
+                $(obj).html("添加");
+                $(outTable).append("<tr>"+(myTr).html()+"</tr>")
+            }
+            myTr.remove();
+        }
+        $(function(){
+
+
+//            var outButs = $("#outTable button");
+//            outButs.each(function(index, domEle){
+//                $(domEle).click(function(){
+//                    exchangeTr(this);
+//                });
+//            });
+//
+//            var inButs = $("#inTable button");
+//            inButs.each(function(index, domEle){
+//                $(domEle).click(function(){
+//                    exchangeTr(this);
+//                });
+//            });
+
+
+//                   //初始化左边待选择用户，为每一个按钮注册事件
+//        function initOut(){
+//            var outButs = $("#outTable button");
+//            var inTable = $("#inTable");
+//
+//            outButs.each(function(index, domEle){
+//                $(domEle).click(function(){
+//                    var thisTr = $(this).parent().parent();
+//                    $(this).html("删除");
+//                    thisTr.remove();
+//                    $(inTable).append("<tr>"+thisTr.html()+"</tr>");
+//
+//
+//                    initOut();
+//                    initIn();
+//                });
+//            });
+//        }
+//        //初始化左边已选择用户，为每一个按钮注册事件
+//        function initIn(){
+//            var inButs = $("#inTable button");
+//            var outTable = $("#outTable");
+//
+//            inButs.each(function(index, domEle){
+//                $(domEle).click(function(){
+//                    var thisTr = $(this).parent().parent();
+//                    $(this).html("添加");
+//                    $(outTable).append("<tr>"+thisTr.html()+"</tr>");
+//                    thisTr.remove();
+//
+//                    initOut();
+//                    initIn();
+//                });
+//            });
+//        }
+//        initOut();
+//        initIn();
+//
+//        $("#subBut").click(function(){
+//            var tds = $("#inTable .uId");//所以的id
+//            var uerIdList = "";
+//            if(tds.length > 0){
+//                uerIdList = $(tds[0]).html();
+//                for(var i=1;i<tds.length;i++){
+//                    uerIdList = uerIdList+","+$(tds[i]).html();
+//                }
+//            }
+//            alert(uerIdList);
+//
+//        });
+//
+//
+//
+        });
+
+    </script>
+</head>
+<body>
+<div style="margin: 20px;width: 900px;">
+    <div class="ep_summary" style="overflow: scroll;width: 300px;height: 400px;font-family: Verdana,arial,sans-serif;float: left;">
+        <h1 class="ep_h1">待选人员</h1>
+        <table id="outTable">
+            <tr>
+                <td>
+                    张1
+                </td>
+                <td class="uId" style="display: none">1</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">添加</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    张2
+                </td>
+                <td class="uId" style="display: none">2</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">添加</button>
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    张3
+                </td>
+                <td class="uId" style="display: none">3</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">添加</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    张4
+                </td>
+                <td class="uId" style="display: none">4</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                      <button class="button" onclick="exchangeTr(this)">添加</button>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="ep_summary" style="overflow: scroll;width: 300px;height: 400px;font-family: Verdana,arial,sans-serif;float: left;">
+        <h1 class="ep_h1">已有人员</h1>
+        <table  id="inTable">
+            <tr>
+                <td>
+                    张三1
+                </td>
+                <td class="uId" style="display: none">11</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    张三2
+                </td>
+                <td class="uId" style="display: none">12</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    张三3
+                </td>
+                <td class="uId" style="display: none" onclick="exchangeTr(this)">13</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    张三4
+                </td>
+                <td class="uId" style="display: none">14</td>
+                <td>
+                    技术专家
+                </td>
+                <td>
+                    <button class="button" onclick="exchangeTr(this)">删除</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div style="float: left;margin-left: 40%;margin-top: 30px;">
+        <form action="" id="addForm" style="display: none">
+            <input name="uerIdList" id="uerIdList">
+            <input name="vtId" id="vtId">
+        </form>
+        <button class="button" id="subBut">提交</button>
+    </div>
+
+    <div style="clear: both"></div>
+</div>
+
+
+</body>
+</html>

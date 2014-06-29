@@ -1,0 +1,220 @@
+package com.qk.action.enterprise;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+import com.qk.bean.CallforbitAndUserBean;
+import com.qk.bean.CallforbitBean;
+import com.qk.bean.CfbCommentBean;
+import com.qk.bean.User;
+import com.qk.common.Page;
+import com.qk.common.PageTool;
+import com.qk.dao.CallforbitDao;
+import com.qk.dao.CfbCommentDao;
+import com.qk.dao.DaoFactory;
+
+import java.util.List;
+
+/**
+ * 企业招标列表
+ */
+public class EnterpriseBidsListAction extends ActionSupport implements ModelDriven<CallforbitBean>{
+
+    /**
+     * pageNumber代表是哪一页
+     * pageSize代表一页中显示多少条数据
+     */
+    private int pageNumber=1;
+    private int pageSize=12;
+    private List<CallforbitBean> list=null;
+    private String pageTools=null;
+    private Integer cfbId;
+    private CallforbitBean callforbitBean=null;
+    private List<CfbCommentBean> lists=null;
+    private String statusFlag="0";
+    private String responseMsg="0";
+    private CallforbitAndUserBean callforbitAndUserBean;
+
+    public String enterpriseBidsList(){
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        int count=callforbitDao.getCallforbitCountByUser(user);
+
+        List<CallforbitBean> list=callforbitDao.getAllCallforbitBeanByUser(pageNumber,pageSize,user);
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageString("/enterpriseBids/enterpriseBidsAll!enterpriseBidsList.action", page);
+        this.list=page.getResult();
+        return "enterpriseBidsList";
+    }
+
+
+    public String enterpriseBidsContent(){
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        callforbitBean= callforbitDao.getCallforbitBycfbId(callforbitBean.getCfbId());
+        statusFlag=callforbitBean.getCfbStatus();
+        CfbCommentDao cfbCommentDao=DaoFactory.cfbCommentDao;
+
+        int count=cfbCommentDao.getCfbCommentCountByUser(callforbitBean.getCfbId(),user);
+        List<CfbCommentBean> list=cfbCommentDao.getCfbCommentBycfbIdAndUser(pageNumber, 6,callforbitBean.getCfbId(), user);
+        Page page = new Page(pageNumber, count, 6, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("/enterpriseBids/enterpriseBidsReview.action", page);
+        this.lists=page.getResult();
+        return "enterpriseBidsContent";
+    }
+
+    public String enterpriseBidsRelease(){
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        callforbitBean.setUserId(user.getId());
+        int key=callforbitDao.insertCallforbit(callforbitBean);
+        if(key>0){
+            responseMsg="1";
+        }else{
+            responseMsg="-1";
+        }
+        return "bidsRelease";
+    }
+
+    public String getEnterpriseEditBids(){
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        callforbitBean= callforbitDao.getCallforbitBycfbId(callforbitBean.getCfbId());
+        return "getEditBids";
+    }
+
+    public String enterpriseEditBids(){
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        callforbitBean.setUserId(user.getId());
+        int key=callforbitDao.editCallforbit(callforbitBean);
+        if(key>0){
+            responseMsg="1";
+        }
+        return "bidsEdit";
+    }
+
+
+    public String enterpriseDeleteBids(){
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        callforbitBean.setUserId(user.getId());
+        int key=callforbitDao.deleteCallforbit(callforbitBean);
+        if(key>0){
+            responseMsg="1";
+        }else{
+            responseMsg="-1";
+        }
+        return "bidsDelete";
+    }
+
+
+    public String enterpriseBidsNoticeList(){
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        int count=callforbitDao.getCallforbitCountByUserAndStatus(user);
+
+        List<CallforbitBean> list=callforbitDao.getAllCallforbitBeanByUserAndStatus(pageNumber, pageSize, user);
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageString("/enterpriseBids/enterpriseBidsNoticeList.action", page);
+        this.list=page.getResult();
+        return "bidsNoticeList";
+    }
+
+    public String enterpriseBidsNotice(){
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        CallforbitDao callforbitDao= DaoFactory.callforbitDao;
+        callforbitAndUserBean= callforbitDao.getCallforbitBycfbIdAndStatus(callforbitBean.getCfbId());
+        return "bidsNotice";
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public List<CallforbitBean> getList() {
+        return list;
+    }
+
+    public void setList(List<CallforbitBean> list) {
+        this.list = list;
+    }
+
+    public String getPageTools() {
+        return pageTools;
+    }
+
+    public void setPageTools(String pageTools) {
+        this.pageTools = pageTools;
+    }
+
+    public Integer getCfbId() {
+        return cfbId;
+    }
+
+    public void setCfbId(Integer cfbId) {
+        this.cfbId = cfbId;
+    }
+
+    public CallforbitBean getCallforbitBean() {
+        return callforbitBean;
+    }
+
+    public void setCallforbitBean(CallforbitBean callforbitBean) {
+        this.callforbitBean = callforbitBean;
+    }
+
+    public List<CfbCommentBean> getLists() {
+        return lists;
+    }
+
+    public void setLists(List<CfbCommentBean> lists) {
+        this.lists = lists;
+    }
+
+    public String getStatusFlag() {
+        return statusFlag;
+    }
+
+    public void setStatusFlag(String statusFlag) {
+        this.statusFlag = statusFlag;
+    }
+
+    @Override
+    public CallforbitBean getModel() {
+        if(callforbitBean==null){
+            callforbitBean=new CallforbitBean();
+        }
+        return callforbitBean;
+    }
+
+    public String getResponseMsg() {
+        return responseMsg;
+    }
+
+    public void setResponseMsg(String responseMsg) {
+        this.responseMsg = responseMsg;
+    }
+
+    public CallforbitAndUserBean getCallforbitAndUserBean() {
+        return callforbitAndUserBean;
+    }
+
+    public void setCallforbitAndUserBean(CallforbitAndUserBean callforbitAndUserBean) {
+        this.callforbitAndUserBean = callforbitAndUserBean;
+    }
+}

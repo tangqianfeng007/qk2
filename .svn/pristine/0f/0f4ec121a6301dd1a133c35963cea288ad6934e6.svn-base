@@ -1,0 +1,16 @@
+package com.qk.email;
+
+
+import com.qk.bean.User;
+
+/**
+ * EMail认证接口
+ * */
+public interface EMailAuthService {
+
+	/**
+	 * 向指定的邮箱发送认证信息
+	 * */
+	public void sendAuthEMail(String email,User user);
+
+}

@@ -1,0 +1,20 @@
+package com.qk.dao;
+
+import com.qk.bean.CallforbitBean;
+import com.qk.bean.CfbCommentBean;
+import com.qk.bean.User;
+
+import java.util.List;
+
+public interface CfbCommentDao {
+
+    public Integer getCfbCommentCount(Integer cfbId);
+
+    public List<CfbCommentBean> getCfbCommentBycfbId(Integer pageNumber, Integer pageSize, Integer cfbId);
+
+    public Boolean insertCfbCommentBycfbIdAnduserID(CfbCommentBean cfbCommentBean);
+
+    public Integer getCfbCommentCountByUser(Integer cfbId, User user);
+
+    public List<CfbCommentBean> getCfbCommentBycfbIdAndUser(Integer pageNumber, Integer pageSize, Integer cfbId, User user);
+}

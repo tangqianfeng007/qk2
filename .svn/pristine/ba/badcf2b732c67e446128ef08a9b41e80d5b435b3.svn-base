@@ -1,0 +1,42 @@
+package com.qk.servlet;
+
+import com.qk.bean.User;
+import com.qk.dao.DaoFactory;
+import com.qk.dao.UserDao;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+
+public class Login extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+    public Login() {
+        super();
+    }
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request,response);
+	}
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session=request.getSession();
+		String username=request.getParameter("username");
+		String password=request.getParameter("password");
+
+        UserDao userDao= DaoFactory.userDao;
+        User user=userDao.loginCheck(username,password);
+
+        if(user==null){
+            request.setAttribute("msg","username or password is error！");
+            request.getRequestDispatcher("login.jsp").forward(request,response);
+        }else{
+            request.setAttribute("msg","login success！");
+            session.setAttribute("user",user);
+            request.getRequestDispatcher("login.jsp").forward(request,response);
+        }
+	}
+}

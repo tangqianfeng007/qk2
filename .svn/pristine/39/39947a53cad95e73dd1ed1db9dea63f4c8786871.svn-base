@@ -1,0 +1,198 @@
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ page import="com.qk.bean.User" %>
+<script src="/js/jquery.js" type="text/javascript"></script>
+<script src="/js/json.min.js" type="text/javascript"></script>
+<script src="/js/jquery.json-2.2.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/css/cutter.css">
+<script type="text/javascript">
+    function login() {
+        var jsonInfro = $("#loginForm").serializeObject();
+        jQuery.ajax({
+            type : 'POST',
+            url : '/ajax/login.action',
+            processData:true,
+            async : true,
+            data: jsonInfro,
+            dataType : 'html',
+            success : function(data) {
+                data = jQuery.parseJSON(data);
+                if (data.status == 1) {
+                    location.href="/index.action";
+                } else if (data.status == -1) {
+                    alert("用户名或密码错误！");
+                    location.reload();
+                } else if (data.status == -2) {
+                    alert("验证码错误！");
+                    location.href="/index.action";
+                }else if (data.status == 2) {
+                    alert("你的帐号正在审核中，请耐心等待...");
+                    location.href="/index.action";
+                }
+            },
+            error : function() {
+                alert("服务器繁忙中！稍后再试！");
+            }
+        });
+    }
+    function askImg(obj)
+    {
+        var url = "/ajax/checkCode.action?rand="+Math.random();
+        var img = "<img src='"+url+"' alt='点击刷新' onclick='askImg(this);' style='cursor:pointer; vertical-align:top; width:63px;height: 32px; margin-left:5px;padding: 0px;' />";
+        $("#yanzheng").html(img);
+    }
+</script>
+<div class="three">
+    <%
+        User user = (User)session.getAttribute("msg");
+        if(user == null)  //未登录
+        {
+    %>
+    <form action="#" onsubmit="login();return false;" method="post" id="loginForm">
+        <ul class="sidebar">
+
+            <li class="selected"
+                style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+                登录
+            </li>
+            <li class="selected">
+                <p>
+                    <input id="username" type="text" placeholder="用户名" name="logBean.username" tabindex="1"
+                           class="text"
+                           style="width: 92%;" autocomplete="off">
+                </p>
+
+                <p>
+                    <input id="pwd" type="password" placeholder="密码" name="logBean.password" tabindex="1"
+                           class="text"
+                           style="width: 92%;" autocomplete="off">
+                </p>
+
+                <p>
+                    <input placeholder="验证码" type="text" name="code" id="code" class="text" tabindex="1"
+                           style="width: 22%;"/>
+                    <span id="yanzheng">
+                            <img id='mask' alt="点击刷新" src="/ajax/checkCode.action?rand=1"
+                                 onclick="askImg(this);"
+                                 style="cursor:pointer; vertical-align:top; width:63px;height: 32px; margin-left:5px;padding: 0px;"/>
+                    </span>
+
+                </p>
+                <input type="submit" value="登录" class="buttonTopAndLogin">&nbsp;&nbsp;<input type="reset" value="注册" onclick="location.href='/reg.jsp'" class="buttonTopAndLogin">
+            </li>
+            <li class="selected"
+                style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+                &nbsp;<s:property value="#parameters.error" /></li>
+        </ul>
+    </form>
+    <%
+    }
+    else //已经登录
+    {
+
+    %>
+    <ul class="sidebar">
+
+        <li class="selected" style="background-color: #F6F6F6;color: #802b17;font-size: 18px;margin-bottom: 10px;">
+            <span style="color: #000000" class="overflow">欢迎你：</span><%=user.getUsername()%>&nbsp;<a href="/log/logout.action" style="display:inline ">退出</a>
+        </li>
+
+        <%
+            ///////////////////////////////////////////企业用户////////////////////////////////////////////////////////////////////
+            if(user.getRole_id() == 2)
+            {
+        %>
+        <li class="selected" style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+            我的空间
+        </li>
+        <li class="selected">
+                                       <span class="leftBar">
+                                            <ul class="sidebar">
+                                                <li class="sidebar_li"><a href="/enterpriseBids/enterpriseBidsAll!enterpriseBidsList.action"  >投标列表</a></li>
+                                                <li class="sidebar_li"><a href="/enterpriseBids/enterpriseBidsNoticeList.action">投标公告</a></li>
+                                                <li class="sidebar_li"><a href="/userInfo/userEdit.jsp">我的资料</a></li>
+                                                <li  class="sidebar_li"><a href="/comments/getPersonCommentsList.action?pageNumber=1">我的站点评论</a></li>
+                                                <li class="sidebar_li"><a href="/ec_comments/getTomeCommentsList.action">我对专家的评论</a></li>
+                                            </ul>
+                                       </span>
+        </li>
+        <li class="selected" style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+            信息发布
+        </li>
+        <li class="selected">
+                            <span class="leftBar">
+                                <ul class="sidebar">
+                                    <li class="sidebar_li"><a href="/enterprise/enterpriseReleaseBids.jsp">发布投标</a></li>
+                                    <li class="sidebar_li"><a href="/experts/getExpertsList.action">评论专家</a></li>
+                                    <li class="sidebar_li"><a href="/comments/siteComments.jsp">站点评论</a></li>
+                                </ul>
+                            </span>
+        </li>
+        <li class="selected" style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+            公共信息
+        </li>
+        <li class="selected">
+                          <span class="leftBar">
+                            <ul class="sidebar">
+                                <li class="sidebar_li"><a href="/bids/bidsAll!bidsList.action">投标列表</a></li>
+                                <li class="sidebar_li"><a href="/bids/bidsNoticeList.action">投标公告</a></li>
+                            </ul>
+                           </span>
+        </li>
+        <%
+        }
+        ///////////////////////////////////////////专家用户////////////////////////////////////////////////////////////////////
+        else  if(user.getRole_id() == 3)
+        {
+        %>
+        <li class="selected" style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+            我的空间
+        </li>
+        <li class="selected">
+                                     <span class="leftBar">
+                                        <ul class="sidebar">
+                                            <li  class="sidebar_li"><a href="/news/getPersonNewsList.action?pageNumber=1">我的新闻</a></li>
+                                            <li  class="sidebar_li"><a href="/pubs/getPersonPubsList.action?pageNumber=1">我的出版物</a></li>
+                                            <li  class="sidebar_li"><a href="/events/getPersonEventsList.action?pageNumber=1">我的活动</a></li>
+                                            <li  class="sidebar_li"><a href="/comments/getPersonCommentsList.action?pageNumber=1">我的站点评论</a></li>
+                                            <li class="sidebar_li"><a href="/ec_comments/getTomeCommentsList.action?pageNumber=1">对我的评论</a></li>
+                                            <li class="sidebar_li"><a href="/team/getMyTeam.action">我的团队</a></li>
+                                            <li class="sidebar_li"><a href="/rfp/getMyRfpInfoList.action">我的RFP</a></li>
+                                            <li class="sidebar_li"><a href="/userInfo/userEdit.jsp">我的资料</a></li>
+                                        </ul>
+                                      </span>
+        </li>
+        <li class="selected" style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+            信息发布
+        </li>
+        <li class="selected">
+                            <span class="leftBar">
+                                <ul class="sidebar">
+                                    <li class="sidebar_li"><a href="/news/newsEdit.jsp">新闻</a></li>
+                                    <li class="sidebar_li"><a href="/events/eventsEdit.jsp">活动</a></li>
+                                    <li class="sidebar_li"><a href="/pubs/pubsEdit.jsp">出版物</a></li>
+                                    <li class="sidebar_li"><a href="/rfp/addRfp.action">RFP</a></li>
+                                    <li class="sidebar_li"><a href="/comments/siteComments.jsp">站点评论</a></li>
+                                </ul>
+                            </span>
+        </li>
+        <li class="selected" style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+            公共信息
+        </li>
+        <li class="selected">
+                          <span class="leftBar">
+                            <ul class="sidebar">
+                                <li  class="sidebar_li"><a href="/bids/bidsAll!bidsList.action">投标列表</a></li>
+                                <li  class="sidebar_li"><a href="/bids/bidsNoticeList.action">投标公告</a></li>
+                                <li class="sidebar_li"><a href="/rfp/getRfpInfoList.action">RFP列表</a></li>
+                            </ul>
+                           </span>
+        </li>
+        <%
+            }
+        %>
+    </ul>
+    <%
+        }
+    %>
+</div>

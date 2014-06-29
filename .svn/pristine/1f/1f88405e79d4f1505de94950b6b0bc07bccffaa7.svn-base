@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+
+    <!-- 权限拦截器 -->
+    <package name="myInterceptor" extends="struts-default">
+        <interceptors>
+            <interceptor name="check" class="com.qk.Interceptor.RoleCheck"/>
+
+            <!-- 管理员权限拦截 -->
+            <interceptor-stack name="managerInterceptor">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="check">
+                    <param name="role_id">1</param>
+                </interceptor-ref>
+            </interceptor-stack>
+
+            <!-- 企业用户权限拦截 -->
+            <interceptor-stack name="enterpriseInterceptor">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="check">
+                    <param name="role_id">2</param>
+                </interceptor-ref>
+            </interceptor-stack>
+
+            <!-- 专家用户权限拦截 -->
+            <interceptor-stack name="expertInterceptor">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="check">
+                    <param name="role_id">3</param>
+                </interceptor-ref>
+            </interceptor-stack>
+
+            <!-- 登陆用户权限拦截 -->
+            <interceptor-stack name="loginInterceptor">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="check">
+                    <param name="role_id">4</param>
+                </interceptor-ref>
+            </interceptor-stack>
+        </interceptors>
+    </package>
+
+    <!-- 首页 -->
+    <package name="index" namespace="/" extends="struts-default">
+        <action name="index" class="com.qk.action.IndexAction" method="index">
+            <result name="success">/index.jsp</result>
+        </action>
+    </package>
+
+    <!-- 注销 -->
+    <package name="log" namespace="/log" extends="struts-default">
+        <action name="logout" class="com.qk.action.LogoutAction" method="logout">
+            <result name="logout" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <package name="askJsp" namespace="/askJsp" extends="struts-default">
+
+        <action name="getJsp" class="com.qk.action.JsonAction" method="getJsp">
+            <!-- 将返回类型设置为json -->
+            <result name="success">/b.jsp</result>
+        </action>
+    </package>
+
+    <!-- ajax -->
+    <package name="ajax" namespace="/ajax" extends="json-default">
+        <action name="jsonAjax" class="com.qk.action.JsonAction">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <action name="checkUsername" class="com.qk.action.RegAction" method="checkUsername">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <action name="reg" class="com.qk.action.RegAction" method="reg">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <action name="checkCode" class="com.qk.common.CheckCode" method="checkCode">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <action name="login" class="com.qk.action.LoginAction" method="login">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <action name="RFPCommentPage" class="com.qk.action.RFPAction" method="RFPCommentPage">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <action name="respondRFPComment" class="com.qk.action.RFPAction" method="respondRFPComment">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+        <action name="deleteRfp" class="com.qk.action.RFPAction" method="deleteRfp">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+        <!--增加一个新成员-->
+        <action name="addRFPMember" class="com.qk.action.VirtualTeamAction" method="addRFPMember">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+        <!--删除一个新成员-->
+        <action name="delRFPMember" class="com.qk.action.VirtualTeamAction" method="delRFPMember">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+
+        <!--更新一个新的团队成员-->
+        <action name="addRFPMemberList" class="com.qk.action.VirtualTeamAction" method="addRFPMemberList">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+        <action name="getTeamAndMembers" class="com.qk.action.VirtualTeamAction" method="getTeamAndMembers">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+        <action name="createTeam" class="com.qk.action.VirtualTeamAction" method="createTeam">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+        <action name="deleteTeam" class="com.qk.action.VirtualTeamAction" method="deleteTeam">
+            <!-- 将返回类型设置为json -->
+            <result type="json"/>
+        </action>
+    </package>
+
+    <!-- 新闻 -->
+    <package name="news" namespace="/news" extends="myInterceptor">
+        <action name="getNewsList" class="com.qk.action.NewsAction" method="getNewsList">
+            <result name="success">/news/newsList.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.NewsAction" method="get">
+            <result name="success">/news/newsContent.jsp</result>
+        </action>
+
+        <action name="getPersonNewsList" class="com.qk.action.NewsAction" method="getPersonNewsList">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/news/newsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="newsChange" class="com.qk.action.NewsAction" method="newsChange">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/news/newsChange.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="deleteNews" class="com.qk.action.NewsAction" method="deleteNews">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <!-- 管理员 -->
+    <package name="managers" namespace="/man" extends="myInterceptor">
+        <action name="getManList" class="com.qk.action.ManagersAction" method="getManagersList">
+            <interceptor-ref name="managerInterceptor"/>
+            <result name="success">/managers/managersList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.ManagersAction" method="get">
+            <interceptor-ref name="managerInterceptor"/>
+            <result name="success">/managers/managersContent.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="pass" class="com.qk.action.ManagersAction" method="pass">
+            <interceptor-ref name="managerInterceptor"/>
+            <result name="success" type="redirectAction">getManList</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="notPass" class="com.qk.action.ManagersAction" method="notPass">
+            <interceptor-ref name="managerInterceptor"/>
+            <result name="success" type="redirectAction">getManList</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="emailCallBack" class="com.qk.action.ManagersAction" method="emailCallBackSuccess">
+            <result name="success" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <!-- 活动 -->
+    <package name="events" namespace="/events" extends="myInterceptor">
+        <action name="getEventsList" class="com.qk.action.EventsAction" method="getEventsList">
+            <result name="success">/events/eventsList.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.EventsAction" method="get">
+            <result name="success">/events/eventsContent.jsp</result>
+        </action>
+
+        <action name="getPersonEventsList" class="com.qk.action.EventsAction" method="getPersonEventsList">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/events/eventsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="eventsChange" class="com.qk.action.EventsAction" method="eventsChange">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/events/eventsChange.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="deleteEvents" class="com.qk.action.EventsAction" method="deleteEvents">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <!-- 出版物 -->
+    <package name="pubs" namespace="/pubs" extends="myInterceptor">
+        <action name="getPubsList" class="com.qk.action.PubsAction" method="getPubsList">
+            <result name="success">/pubs/pubsList.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.PubsAction" method="get">
+            <result name="success">/pubs/pubsContent.jsp</result>
+        </action>
+
+        <action name="getPersonPubsList" class="com.qk.action.PubsAction" method="getPersonPubsList">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/pubs/pubsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="pubsChange" class="com.qk.action.PubsAction" method="pubsChange">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/pubs/pubsChange.jsp</result>
+        </action>
+
+        <action name="deletePubs" class="com.qk.action.PubsAction" method="deletePubs">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+    </package>
+
+    <!-- 专家 -->
+    <package name="experts" namespace="/experts" extends="struts-default">
+        <action name="getExpertsList" class="com.qk.action.ExpertsAction" method="getExpertsList">
+            <result name="success">/experts/expertsList.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.ExpertsAction" method="get">
+            <result name="success">/experts/expertsContent.jsp</result>
+        </action>
+
+        <action name="expertsSeek" class="com.qk.action.ExpertsAction" method="expertsSeek">
+            <result name="success">/experts/expertsListOnlyCenter.jsp</result>
+        </action>
+    </package>
+
+    <!-- 站点评论 -->
+    <package name="comments" namespace="/comments" extends="myInterceptor">
+        <action name="getCommentsList" class="com.qk.action.CommentsAction" method="getCommentsList">
+            <result name="success">/comments/commentsList.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.CommentsAction" method="get">
+            <result name="success">/comments/commentsContent.jsp</result>
+        </action>
+
+        <action name="getPersonCommentsList" class="com.qk.action.CommentsAction" method="getPersonCommentsList">
+            <interceptor-ref name="loginInterceptor"/>
+            <result name="success">/comments/commentsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="insertComments" class="com.qk.action.CommentsAction" method="insertComments">
+            <result name="insertComments">/comments/siteComments.jsp</result>
+        </action>
+
+        <action name="deleteComments" class="com.qk.action.CommentsAction" method="deleteComments">
+            <result name="deleteComments">/comments/commentsList.jsp</result>
+        </action>
+    </package>
+
+    <!-- 企业对专家评论 -->
+    <package name="ec_comments" namespace="/ec_comments" extends="myInterceptor">
+        <action name="getTomeCommentsList" class="com.qk.action.Ec_CommentsAction" method="getTomeCommentsList">
+            <interceptor-ref name="enterpriseInterceptor"/>
+            <result name="success">/ec_comment/ec_commentsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.Ec_CommentsAction" method="get">
+            <interceptor-ref name="enterpriseInterceptor"/>
+            <result name="success">/ec_comment/ec_commentsContent.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="deleteEnterpriseCommentBean" class="com.qk.action.Ec_CommentsAction" method="deleteEnterpriseCommentBean">
+            <interceptor-ref name="enterpriseInterceptor"/>
+            <result name="success">/ec_comment/ec_commentsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+
+    <!-- 企业对专家评论 -->
+    <package name="expert_comments" namespace="/expert_comments" extends="myInterceptor">
+        <action name="getExpertCommentsList" class="com.qk.action.Ec_CommentsAction" method="getExpertCommentsList">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/ec_comment/expert_commentsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="getExpert" class="com.qk.action.Ec_CommentsAction" method="getExpert">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success">/ec_comment/ec_commentsContent.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <!-- 发布编辑 -->
+    <package name="edit" namespace="/edit" extends="myInterceptor">
+        <action name="newsEdit" class="com.qk.action.NewsEditAction" method="newsEdit">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success" type="redirect">/news/getNewsList.action?pageNumber=1</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="newsChange" class="com.qk.action.NewsEditAction" method="newsChange">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success" type="redirect">/news/getNewsList.action?pageNumber=1</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="eventsEdit" class="com.qk.action.EventsEditAction" method="eventsEdit">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success" type="redirect">/events/getEventsList.action?pageNumber=1</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="eventsChange" class="com.qk.action.EventsEditAction" method="eventsChange">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success" type="redirect">/events/getEventsList.action?pageNumber=1</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="pubsEdit" class="com.qk.action.PubsEditAction" method="pubsEdit">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success" type="redirect">/pubs/getPubsList.action?pageNumber=1</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="pubsChange" class="com.qk.action.PubsEditAction" method="pubsChange">
+            <interceptor-ref name="expertInterceptor"/>
+            <result name="success" type="redirect">/pubs/getPubsList.action?pageNumber=1</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <!-- 资料更改 -->
+    <package name="info" namespace="/info" extends="myInterceptor">
+        <action name="infoChange" class="com.qk.action.InfoFindAction" method="info">
+            <interceptor-ref name="loginInterceptor"/>
+            <result name="success">/userInfo/userEdit.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+    </package>
+
+    <package name="RFP" namespace="/rfp" extends="struts-default">
+        <action name="getRfpInfoList" class="com.qk.action.RFPAction" method="getRfpInfoList">
+            <result name="success">/RFP/RFPList.jsp</result>
+        </action>
+        <action name="getMyRfpInfoList" class="com.qk.action.RFPAction" method="getMyRfpInfoList">
+            <result name="success">/RFP/RFPList.jsp</result>
+        </action>
+
+        <action name="get" class="com.qk.action.RFPAction" method="get">
+            <result name="success">/RFP/RFPContent.jsp</result>
+        </action>
+
+        <action name="addRfp" class="com.qk.action.RFPAction" method="addRfp">
+            <result name="success">/RFP/addRfp.jsp</result>
+        </action>
+        <action name="doAddRfp" class="com.qk.action.RFPAction" method="doAddRfp">
+            <result name="success">/RFP/addRfp.jsp</result>
+        </action>
+
+        <action name="editRfp" class="com.qk.action.RFPAction" method="editRfp">
+            <result name="success">/RFP/editRfp.jsp</result>
+        </action>
+        <action name="doEditRfp" class="com.qk.action.RFPAction" method="doEditRfp">
+            <result name="success" >/RFP/editRfp.jsp</result>
+        </action>
+
+        <action name="getTeamAndMembers" class="com.qk.action.VirtualTeamAction" method="getTeamAndMembers">
+            <!-- 将返回类型设置为json -->
+            <result name="success">/RFP/members.jsp</result>
+        </action>
+    </package>
+
+    <package name="team" namespace="/team" extends="struts-default">
+        <action name="getMyTeam" class="com.qk.action.VirtualTeamAction" method="getMyTeam">
+            <result name="success">/team/teamList.jsp</result>
+        </action>
+
+        <action name="editTeam" class="com.qk.action.VirtualTeamAction" method="getTeamAndMembers">
+            <result name="success">/team/editTeam.jsp</result>
+        </action>
+
+        <action name="doEditTeam" class="com.qk.action.VirtualTeamAction" method="doEditTeam">
+            <result name="success">/team/editTeam.jsp</result>
+        </action>
+
+        <action name="teamContent" class="com.qk.action.VirtualTeamAction" method="getTeamAndMembers">
+            <result name="success">/team/teamContent.jsp</result>
+        </action>
+    </package>
+
+    <!-- 招标 -->
+    <package name="bids" extends="myInterceptor" namespace="/bids">
+        <action name="bidsAll" class="com.qk.action.BidsListAction">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidList">/bids/bidsList.jsp</result>
+            <result name="bidsContent">/bids/bidsContent.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="bidsReview" class="com.qk.action.BidsListReview" method="bidsReview">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidsComments">/bids/bidsComments.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="respondBidsComment" class="com.qk.action.BidsListReview" method="respondBidsComment">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="respondComments">/bids/bidsComments.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+
+        <action name="bidsNoticeList" class="com.qk.action.BidsListAction" method="bidsNoticeList">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="noticeList">/bids/bidsNoticeList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="bidsNotice" class="com.qk.action.BidsListAction" method="bidsNotice">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="notice">/bids/bidsNotice.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+
+    </package>
+
+    <package name="enterpriseBids" extends="myInterceptor" namespace="/enterpriseBids">
+        <action name="enterpriseBidsAll" class="com.qk.action.enterprise.EnterpriseBidsListAction">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="enterpriseBidsList">/enterprise/enterpriseBidsList.jsp</result>
+            <result name="enterpriseBidsContent">/enterprise/enterpriseBidsContent.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="enterpriseBidsReview" class="com.qk.action.enterprise.EnterpriseBidsListReview" method="enterpriseBidsReview">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="enterpriseBidsComments">/enterprise/enterpriseBidsComments.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="enterpriseResponseBidsUser" class="com.qk.action.enterprise.EnterpriseBidsListReview" method="enterpriseResponseBidsUser">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="enterpriseResponse">/enterprise/enterpriseBidsComments.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="expertWinBids" class="com.qk.action.enterprise.EnterpriseBidsListReview" method="expertWinBids">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="expertWinBidsTheUser">/enterprise/enterpriseBidsComments.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="enterpriseBidsRelease" class="com.qk.action.enterprise.EnterpriseBidsListAction" method="enterpriseBidsRelease">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidsRelease">/enterprise/enterpriseReleaseBids.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="getEnterpriseEditBids" class="com.qk.action.enterprise.EnterpriseBidsListAction" method="getEnterpriseEditBids">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="getEditBids">/enterprise/enterpriseEditBids.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="enterpriseEditBids" class="com.qk.action.enterprise.EnterpriseBidsListAction" method="enterpriseEditBids">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidsEdit">/enterprise/enterpriseEditBids.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+
+        <action name="enterpriseDeleteBids" class="com.qk.action.enterprise.EnterpriseBidsListAction" method="enterpriseDeleteBids">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidsDelete">/enterprise/enterpriseBidsList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="enterpriseBidsNoticeList" class="com.qk.action.enterprise.EnterpriseBidsListAction" method="enterpriseBidsNoticeList">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidsNoticeList">/enterprise/enterpriseBidsNoticeList.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+        <action name="enterpriseBidsNotice" class="com.qk.action.enterprise.EnterpriseBidsListAction" method="enterpriseBidsNotice">
+            <interceptor-ref name="loginInterceptor"></interceptor-ref>
+            <result name="bidsNotice">/enterprise/enterpriseBidsNotice.jsp</result>
+            <result name="fail" type="redirect">/index.jsp</result>
+        </action>
+
+    </package>
+
+
+    <!-- 企业对专家的评论 -->
+    <package name="enterpriseToExperts" extends="struts-default">
+        <action name="commentsList" class="com.qk.action.EnterpriseToExpertsComment" method="commentsList">
+            <result name="commentsAllList">/experts/expertsContent.jsp</result>
+        </action>
+
+        <action name="seeComments" class="com.qk.action.EnterpriseToExpertsComment" method="seeComments">
+            <result name="seeComments">/experts/expertsComments.jsp</result>
+        </action>
+
+        <action name="commentsExperts" class="com.qk.action.EnterpriseToExpertsComment" method="commentsExperts">
+            <result name="commentsExperts">/experts/expertsComments.jsp</result>
+        </action>
+    </package>
+
+    <package name="static" namespace="/static" extends="struts-default">
+        <action name="right" class="com.qk.action.StaticAction" method="getRight">
+            <result name="success">/static/right.jsp</result>
+        </action>
+    </package>
+
+    <package name="staticIndex" namespace="/index" extends="struts-default">
+        <action name="index" class="com.qk.action.IndexAction" method="index">
+            <result name="success">/static/index.jsp</result>
+        </action>
+    </package>
+</struts>

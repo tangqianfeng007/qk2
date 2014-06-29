@@ -1,0 +1,29 @@
+package com.qk.dao;
+
+import com.qk.bean.CfbCommentBean;
+import com.qk.bean.RfpInfoBean;
+import com.qk.bean.RfpInfoCommentBean;
+
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-5
+ * Time: 下午7:06
+ * To change this template use File | Settings | File Templates.
+ */
+public interface RfpInfoCommentDao {
+    public Integer getCount(Integer rfpInfoId);
+
+    public  List<RfpInfoCommentBean> getRfpInfoCommentList(Integer pageNumber, Integer pageSize,Integer rfpInfoId);
+
+    public Boolean insert(RfpInfoCommentBean rfpInfoCommentBean);
+
+    /**
+     * 获取rfpInfoId下所有的评论，去除重复的人
+     * @param rfpInfoId
+     * @return
+     */
+    public List<RfpInfoCommentBean> getOnlyAllComment(Integer rfpInfoId);
+}

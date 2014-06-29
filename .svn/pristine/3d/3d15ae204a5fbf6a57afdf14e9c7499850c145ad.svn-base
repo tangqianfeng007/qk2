@@ -1,0 +1,44 @@
+package com.qk.dao;
+
+
+import com.qk.bean.User;
+
+import java.util.List;
+
+public interface UserDao {
+
+    public User regCheck(String username);
+
+    public User loginCheck(String username, String password);
+
+    public User register(User user);
+
+    public int update(User user);
+
+    public boolean deleteById(int id);
+
+    public List expertTopTen();
+
+    public User infoFindById(int id);
+
+    public int getCount();
+
+    public int getCount2();
+
+    public int getCount3(String nameIndex);
+
+    public int getCount4(String nameIndex);
+
+    public List<User> getList(Integer pageNumber, Integer pageSize);
+
+    public List<User> getInactiveList(Integer pageNumber, Integer pageSize);
+
+    public List<User> getSeekList(Integer pageNumber, Integer pageSize, String nameIndex);
+
+    public List<User> getSeekListForEnterprise(Integer pageNumber, Integer pageSize, String nameIndex);
+
+    public void setStatus(int id, String lv);
+
+    public User checkEmailCode(String emailCode);
+
+}

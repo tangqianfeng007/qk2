@@ -1,0 +1,111 @@
+﻿html {
+    background-color: #fbfbfb;
+}
+
+body {
+    font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', SimSun, 'Segoe UI', Tahoma, Helvetica, Sans-Serif;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.content_login {
+    overflow: hidden;
+    padding: 0;
+    text-align: center;
+    width: 840px;
+    margin: 140px auto;
+}
+
+.content_login .top_bg {
+    height: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.login_top {
+    border-bottom: 1px solid #FF6C1E;
+    height: 23px;
+    margin: 0 20px;
+    padding: 15px 0 10px;
+    width: auto;
+}
+
+.login_cont03 {
+    background: none repeat scroll 0 0 #FFFDEE;
+    border: 1px solid #EDD28B;
+    color: #000000;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 28px;
+    margin: 50px;
+    overflow: hidden;
+    padding: 30px 50px;
+    text-align: left;
+    width: 638px;
+}
+
+.content_login .btm_bg {
+    height: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.login_cont03 img {
+    float: left;
+    padding-right: 20px;
+}
+
+img {
+    border: medium none;
+}
+
+.user_client span, .user_client label {
+    display: inline-block;
+    float: left;
+    line-height: 38px;
+    margin-right: 5px;
+    padding: 0;
+}
+
+.login_cont03 p.cont {
+    color: #000000;
+    float: right;
+    margin: 0;
+    padding: 0;
+    width: 560px;
+}
+
+ul, p {
+    list-style: none outside none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    float: left;
+    margin-left: 50px;
+}
+
+.quicklogin {
+    line-height: 1.6;
+    padding-top: 30px;
+    font-size: 14px;
+}
+
+.user_client span, .user_client label {
+    display: inline-block;
+    float: left;
+    line-height: 38px;
+    margin-right: 5px;
+    padding: 0;
+}
+
+.fcf60 {
+    color: #FF6600;
+}
+
+a {
+    color: #666666;
+    outline: medium none;
+    text-decoration: none;
+}

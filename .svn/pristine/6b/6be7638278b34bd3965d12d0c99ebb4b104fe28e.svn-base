@@ -1,0 +1,29 @@
+package com.qk.dao;
+
+import com.qk.bean.QkNewsBean;
+import com.qk.bean.RfpInfoBean;
+
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-5
+ * Time: 下午7:06
+ * To change this template use File | Settings | File Templates.
+ */
+public interface RfpInfoDao {
+    public RfpInfoBean infoFindById(int id);
+
+    public int getCount();
+
+    public List<RfpInfoBean> getList(Integer pageNumber, Integer pageSize);
+
+    public List<RfpInfoBean> getMyList(Integer userId, Integer pageNumber, Integer pageSize);
+
+    public Integer deleteRfp(Integer rfpId);
+
+    public int addRfp(RfpInfoBean rfpInfoBean);
+
+    public int updateRfp(RfpInfoBean rfpInfoBean);
+}

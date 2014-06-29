@@ -1,0 +1,112 @@
+package com.qk.bean;
+
+import java.io.Serializable;
+
+public class SiteCommentBean implements Serializable {
+    private Integer scId;
+
+    private Integer userId;
+
+    private String scTitle;
+
+    private String scContent;
+
+    private Integer scCount;
+
+    private String scPosted;
+
+    private String scRemark;
+
+    private static final long serialVersionUID = 1L;
+
+    public Integer getScId() {
+        return scId;
+    }
+
+    public void setScId(Integer scId) {
+        this.scId = scId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getScTitle() {
+        return scTitle;
+    }
+
+    public void setScTitle(String scTitle) {
+        this.scTitle = scTitle == null ? null : scTitle.trim();
+    }
+
+    public String getScContent() {
+        return scContent;
+    }
+
+    public void setScContent(String scContent) {
+        this.scContent = scContent == null ? null : scContent.trim();
+    }
+
+    public Integer getScCount() {
+        return scCount;
+    }
+
+    public void setScCount(Integer scCount) {
+        this.scCount = scCount;
+    }
+
+    public String getScPosted() {
+        return scPosted;
+    }
+
+    public void setScPosted(String scPosted) {
+        this.scPosted = scPosted == null ? null : scPosted.trim();
+    }
+
+    public String getScRemark() {
+        return scRemark;
+    }
+
+    public void setScRemark(String scRemark) {
+        this.scRemark = scRemark == null ? null : scRemark.trim();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) {
+            return true;
+        }
+        if (that == null) {
+            return false;
+        }
+        if (getClass() != that.getClass()) {
+            return false;
+        }
+        SiteCommentBean other = (SiteCommentBean) that;
+        return (this.getScId() == null ? other.getScId() == null : this.getScId().equals(other.getScId()))
+            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+            && (this.getScTitle() == null ? other.getScTitle() == null : this.getScTitle().equals(other.getScTitle()))
+            && (this.getScContent() == null ? other.getScContent() == null : this.getScContent().equals(other.getScContent()))
+            && (this.getScCount() == null ? other.getScCount() == null : this.getScCount().equals(other.getScCount()))
+            && (this.getScPosted() == null ? other.getScPosted() == null : this.getScPosted().equals(other.getScPosted()))
+            && (this.getScRemark() == null ? other.getScRemark() == null : this.getScRemark().equals(other.getScRemark()));
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getScId() == null) ? 0 : getScId().hashCode());
+        result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
+        result = prime * result + ((getScTitle() == null) ? 0 : getScTitle().hashCode());
+        result = prime * result + ((getScContent() == null) ? 0 : getScContent().hashCode());
+        result = prime * result + ((getScCount() == null) ? 0 : getScCount().hashCode());
+        result = prime * result + ((getScPosted() == null) ? 0 : getScPosted().hashCode());
+        result = prime * result + ((getScRemark() == null) ? 0 : getScRemark().hashCode());
+        return result;
+    }
+}

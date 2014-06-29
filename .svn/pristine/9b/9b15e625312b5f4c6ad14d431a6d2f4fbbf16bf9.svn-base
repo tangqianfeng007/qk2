@@ -1,0 +1,67 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ModelDriven;
+import com.qk.bean.PublicationsBean;
+import com.qk.bean.User;
+import com.qk.dao.DaoFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-12
+ * Time: 下午3:06
+ * To change this template use File | Settings | File Templates.
+ */
+public class PubsEditAction implements ModelDriven<PublicationsBean> {
+    private PublicationsBean publicationsBean;
+    private String responseMsg="0";
+
+    public String pubsEdit(){
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        publicationsBean.setUserId(user.getId());
+        publicationsBean.setPubCount(0);
+        publicationsBean.setPubPosted(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+        int key= DaoFactory.publicationDao.insertPub(publicationsBean);
+        if(key>0){
+            responseMsg="1";
+        }else{
+            responseMsg="-1";
+        }
+        return "success";
+    }
+
+    public String pubsChange(){
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        PublicationsBean u =DaoFactory.publicationDao.infoFindById(publicationsBean.getPubId());
+        int key=-1;
+        if(user.getId()==u.getUserId()){
+            key=DaoFactory.publicationDao.updatePubs(publicationsBean);
+        }
+        if(key>0){
+            responseMsg="1";
+        }else{
+            responseMsg="-1";
+        }
+        return "success";
+    }
+
+    @Override
+    public PublicationsBean getModel() {
+        if(publicationsBean==null){
+            publicationsBean = new PublicationsBean();
+        }
+        return publicationsBean;
+    }
+
+    public String getResponseMsg() {
+        return responseMsg;
+    }
+
+    public void setResponseMsg(String responseMsg) {
+        this.responseMsg = responseMsg;
+    }
+}

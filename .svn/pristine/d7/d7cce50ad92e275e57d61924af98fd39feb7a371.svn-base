@@ -1,0 +1,305 @@
+package com.qk.dao.impl;
+
+import com.qk.bean.EventBean;
+import com.qk.dao.EventDao;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-5
+ * Time: 下午8:12
+ * To change this template use File | Settings | File Templates.
+ */
+public class EventDaoImp implements EventDao {
+
+    private DataSource dataSource;
+
+    private PreparedStatement preparedStatement;
+
+    public EventDaoImp(DataSource dataSource){
+        this.dataSource=dataSource;
+    }
+
+    @Override
+    public List eventsTopTen() {
+        Connection connection=null;
+        ResultSet resultSet =null;
+        List list = new ArrayList();
+        String sql ="select  * from event  where ROWNUM <= 5  order by event_count desc";
+        try {
+            connection=dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            while (resultSet.next()){
+                EventBean eventBean = new EventBean();
+                eventBean.setEventId(resultSet.getInt("event_id"));
+                eventBean.setEventCount(resultSet.getInt("event_count"));
+                eventBean.setEventTitle(resultSet.getString("event_title"));
+                list.add(eventBean);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return list;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public EventBean infoFindById(int id) {
+        Connection connection=null;
+        ResultSet resultSet=null;
+        EventBean eventBean=null;
+        String sql ="select * from event WHERE event_id = ?";
+        try {
+            connection=dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1,id);
+            resultSet = this.preparedStatement.executeQuery();
+            if(resultSet.next()){
+                eventBean = new EventBean();
+                eventBean.setEventId(resultSet.getInt("event_id"));
+                eventBean.setUserId(resultSet.getInt("user_id"));
+                eventBean.setEventTitle(resultSet.getString("event_title"));
+                eventBean.setEventKeywords(resultSet.getString("event_keywords"));
+                eventBean.setEventDate(resultSet.getString("event_date"));
+                eventBean.setEventPosted(resultSet.getString("event_posted"));
+                eventBean.setEventLocation(resultSet.getString("event_location"));
+                eventBean.setEventSummary(resultSet.getString("event_summary"));
+                eventBean.setEventCount(resultSet.getInt("event_count"));
+                eventBean.setEventRemark(resultSet.getString("event_remark"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return eventBean;
+    }
+
+    @Override
+    public void updateClickCount(int offset,int id) {
+        Connection connection=null;
+        String sql = "update event set event_count= event_count+? WHERE event_id=?";
+        try {
+            connection=dataSource.getConnection();
+            this.preparedStatement =connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1,offset);
+            this.preparedStatement.setInt(2,id);
+            this.preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (this.preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getCount(int userid) {
+        Connection connection=null;
+        int count=0;
+        ResultSet resultSet=null;
+        String sql=null;
+        if(userid>0){
+            sql="select count(*) as countNum from event where user_id="+userid;
+        }else{
+            sql="select count(*) as countNum from event";
+        }
+        try {
+            connection=dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                count=resultSet.getInt("countNum");
+            }
+            resultSet.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public List<EventBean> getList(Integer pageNumber, Integer pageSize,int useid) {
+        Connection connection=null;
+        List<EventBean> list=new ArrayList<EventBean>();
+        String sql=null;
+        ResultSet resultSet = null;
+       if(useid>0){
+           sql="SELECT * FROM (" +
+                   "SELECT ROWNUM AS rn, t.* FROM   (" +
+                   "SELECT * FROM event where user_id="+useid+" ORDER BY event_posted DESC) t) " +
+                   "WHERE rn BETWEEN "+((pageNumber-1)*pageSize + 1) +" AND "+(pageNumber*pageSize);
+       }
+       else {
+           sql="SELECT * FROM (" +
+                   "SELECT ROWNUM AS rn, t.* FROM   (" +
+                   "SELECT * FROM event ORDER BY event_posted DESC) t) " +
+                   "WHERE rn BETWEEN "+((pageNumber-1)*pageSize + 1) +" AND "+(pageNumber*pageSize);
+       }
+        try {
+            connection=dataSource.getConnection();
+//            System.out.println(sql);
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            while(resultSet.next()) {
+                EventBean obj=new EventBean();
+
+                Integer eventId=resultSet.getInt("event_id");
+                Integer userId=resultSet.getInt("user_id");
+                String eventTitle=resultSet.getString("event_title");
+                String eventKeywords=resultSet.getString("event_keywords");
+
+                String eventDate=resultSet.getString("event_date");
+                String eventPosted=resultSet.getString("event_posted");
+                String eventLocation=resultSet.getString("event_location");
+                String eventSummary=resultSet.getString("event_summary");
+                Integer eventCount=resultSet.getInt("event_count");
+                String eventRemark=resultSet.getString("event_remark");
+
+
+                obj.setEventId(eventId);
+                obj.setUserId(userId);
+                obj.setEventTitle(eventTitle);
+                obj.setEventKeywords(eventKeywords);
+                obj.setEventDate(eventDate);
+                obj.setEventPosted(eventPosted);
+
+                obj.setEventLocation(eventLocation);
+                obj.setEventSummary(eventSummary);
+                obj.setEventCount(eventCount);
+                obj.setEventRemark(eventRemark);
+
+                list.add(obj);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public Integer insertEvent(EventBean eventBean) {
+        int num=-1;
+        String sql="insert into event  values(event_seq.NEXTVAL,?,?,?,?,?,?,?,?,?)";
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection() ;
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1,eventBean.getUserId());
+            this.preparedStatement.setString(2,eventBean.getEventTitle());
+            this.preparedStatement.setString(3,eventBean.getEventKeywords());
+            this.preparedStatement.setString(4,eventBean.getEventDate());
+            this.preparedStatement.setString(5,eventBean.getEventPosted());
+            this.preparedStatement.setString(6,eventBean.getEventLocation());
+            this.preparedStatement.setString(7,eventBean.getEventSummary());
+            this.preparedStatement.setInt(8,eventBean.getEventCount());
+            this.preparedStatement.setString(9,eventBean.getEventRemark());
+            num=this.preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        finally {
+            if (this.preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return num;
+    }
+
+    @Override
+    public int updateEvent(EventBean eventBean) {
+        Connection connection=null;
+        int flag=0;
+        String sql="UPDATE event SET user_id=?,event_title=?,event_keywords=?,event_date=?,event_posted=?," +
+                "event_location=?,event_summary=?,event_count=?,event_remark=? WHERE event_id=?";
+        try {
+            connection=dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1,eventBean.getUserId());
+            this.preparedStatement.setString(2,eventBean.getEventTitle());
+            this.preparedStatement.setString(3,eventBean.getEventKeywords());
+            this.preparedStatement.setString(4,eventBean.getEventDate());
+            this.preparedStatement.setString(5,eventBean.getEventPosted());
+            this.preparedStatement.setString(6,eventBean.getEventLocation());
+            this.preparedStatement.setString(7,eventBean.getEventSummary());
+            this.preparedStatement.setInt(8,eventBean.getEventCount());
+            this.preparedStatement.setString(9,eventBean.getEventRemark());
+            this.preparedStatement.setInt(10,eventBean.getEventId());
+            flag = this.preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        finally {
+            if (this.preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return flag;
+    }
+
+}

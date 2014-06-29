@@ -1,0 +1,928 @@
+package com.qk.common;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ * 日常工具方法
+ */
+public class Tools {
+    private Calendar calendar = null;
+    private int minus = 0;
+
+    public Tools() {
+
+    }
+
+    public Tools(int t) {
+        this.minus = t;
+        this.calendar = new GregorianCalendar();
+    }
+
+    /**
+     * 获取时间的分段区间  （按天）
+     *
+     * @param beginTime
+     * @param endTime
+     * @param num       份数
+     * @return
+     */
+    public static String[] getdates(String beginTime, String endTime, int num) {
+        String[] dates = new String[num];
+
+        long days = getDiffDay(beginTime, endTime);
+        int fen = (int) days / num;
+        int lastFen = (int) (fen + days % num);
+
+        String curtime = Tools.getNowDate();
+        for (int i = 0; i < num; i++) {
+            if (i == num - 1) {
+                dates[i] = getDate(curtime, 1, lastFen);
+            } else {
+                dates[i] = getDate(curtime, 1, fen);
+            }
+            curtime = dates[i];
+        }
+        return dates;
+    }
+
+    /**
+     * 时间的加减运算
+     *
+     * @param time 起始时间
+     * @param type 类型
+     * @param num  数量
+     * @return
+     */
+    public static String getDate(String time, int type, int num) {
+        String resTime = "";
+        try {
+            //字符串时间转Date
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date d = sdf.parse(time);
+
+            Calendar c = Calendar.getInstance();
+
+            //Date 转Calendar
+            c.setTime(d);
+
+            //使用Calendar  进行时间的加减运算
+            if (type == 2) {
+                c.add(Calendar.MONTH, num);
+            } else if (type == 1) {
+                c.add(Calendar.DATE, num);
+            } else if (type == 3) {
+                c.add(Calendar.YEAR, num);
+            }
+
+            //最终把Calendar  转Date 再转 String 输出
+//            System.out.println(sdf.format(c.getTime()));
+            resTime = sdf.format(c.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resTime;
+    }
+
+    /**
+     * 获取日期相差天数
+     *
+     * @param
+     * @return 日期类型时间
+     * @throws java.text.ParseException
+     */
+    public static Long getDiffDay(String beginDate, String endDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Long checkday = 0l; //开始结束相差天数
+        try {
+            checkday = (formatter.parse(endDate).getTime() - formatter.parse(beginDate).getTime()) / (1000 * 24 * 60 * 60);
+//            if ((formatter.parse(endDate).getTime() - formatter.parse(beginDate).getTime()) % (1000 * 24 * 60 * 60) > 0) {
+//                checkday += 1;
+//            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            checkday = null;
+        }
+        return checkday;
+    }
+
+    public static Long getDiffDay(java.util.Date beginDate, java.util.Date endDate) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String strBeginDate = format.format(beginDate);
+        String strEndDate = format.format(endDate);
+        return getDiffDay(strBeginDate, strEndDate);
+    }
+
+    public static Long getDiffMinutes(String beginDate, String endDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Long check = 0l; //开始结束相差天数
+        try {
+            check = (formatter.parse(endDate).getTime() - formatter.parse(beginDate).getTime()) / (1000 * 60);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            check = null;
+        }
+        return check;
+    }
+
+    public static Long getDiffMinutes(java.util.Date beginDate, java.util.Date endDate) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String strBeginDate = format.format(beginDate);
+        String strEndDate = format.format(endDate);
+        return getDiffMinutes(strBeginDate, strEndDate);
+    }
+
+
+    /**
+     * 获得指定之前时间的时间戳(秒级别)
+     *
+     * @return
+     */
+    public long getBeforeTimeStamp() {
+        StringBuffer buf = new StringBuffer();
+        buf.append(calendar.get(Calendar.YEAR));
+        buf.append(this.addZero(calendar.get(Calendar.MONTH) + 1, 2));
+        buf.append(this.addZero(calendar.get(Calendar.DAY_OF_MONTH), 2));
+        buf.append(this.addZero(calendar.get(Calendar.HOUR_OF_DAY), 2));
+        calendar.add(Calendar.MINUTE, this.minus);
+        buf.append(this.addZero(calendar.get(Calendar.MINUTE), 2));
+        buf.append(this.addZero(calendar.get(Calendar.SECOND), 2));
+//	  buf.append(this.addZero(calendar.get(Calendar.MILLISECOND), 3));
+
+        return Long.parseLong(buf.toString());
+    }
+
+    /**
+     * 获得系统的时间戳  (毫秒级)
+     *
+     * @return
+     */
+    public long getTimeStamp() {
+        StringBuffer buf = new StringBuffer();
+        buf.append(calendar.get(Calendar.YEAR));
+        buf.append(this.addZero(calendar.get(Calendar.MONTH) + 1, 2));
+        buf.append(this.addZero(calendar.get(Calendar.DAY_OF_MONTH), 2));
+        buf.append(this.addZero(calendar.get(Calendar.HOUR_OF_DAY), 2));
+        calendar.add(Calendar.MINUTE, this.minus);
+        buf.append(this.addZero(calendar.get(Calendar.MINUTE), 2));
+        buf.append(this.addZero(calendar.get(Calendar.SECOND), 2));
+        buf.append(this.addZero(calendar.get(Calendar.MILLISECOND), 3));
+
+        return Long.parseLong(buf.toString());
+    }
+
+    private String addZero(int num, int len) {
+        StringBuffer s = new StringBuffer();
+        s.append(num);
+        while (s.length() < len) {
+            s.insert(0, "0");
+        }
+        return s.toString();
+    }
+
+    /**
+     * 返回普通sql日期
+     *
+     * @param dates
+     * @return
+     */
+    @SuppressWarnings("UNCHECKED")
+    public static Date getSqlDate(String dates) {
+        Date sqlDate = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            java.util.Date date = sdf.parse(dates);
+            sqlDate = new Date(date.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sqlDate;
+    }
+
+    /**
+     * 返回当前精确sql日期
+     *
+     * @return
+     */
+    public static Timestamp getSqlTime() {
+        Timestamp sqlDate = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        try {
+            java.util.Date date = sdf.parse(getNowDate("yyyy-MM-dd hh:mm:ss"));
+            sqlDate = new Timestamp(date.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sqlDate;
+    }
+
+    public static String getChnMoney(String bigdMoneyNumber) {
+        return getChnMoney(new BigDecimal(bigdMoneyNumber));
+    }
+
+    public static String getChnMoney(BigDecimal bigdMoneyNumber) {
+        String[] straChineseUnit = new String[]{"分", "角", "圆", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟"};
+        String[] straChineseNumber = new String[]{"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};//中文数字字符数组
+        String strChineseCurrency = "";
+        boolean bZero = true;//零数位标记
+        int ChineseUnitIndex = 0;//中文金额单位下标
+        try {
+            if (bigdMoneyNumber.intValue() == 0) return "零圆整";
+            double doubMoneyNumber = Math.round(bigdMoneyNumber.doubleValue() * 100);//处理小数部分，四舍五入
+            boolean bNegative = doubMoneyNumber < 0;//是否负数
+            doubMoneyNumber = Math.abs(doubMoneyNumber);//取绝对值
+            while (doubMoneyNumber > 0)//循环处理转换操作
+            {
+                if (ChineseUnitIndex == 2 && strChineseCurrency.length() == 0)
+                    strChineseCurrency = strChineseCurrency + "整";//整的处理(无小数位)
+                if (doubMoneyNumber % 10 > 0)//非零数位的处理
+                {
+                    strChineseCurrency = straChineseNumber[(int) doubMoneyNumber % 10] + straChineseUnit[ChineseUnitIndex] + strChineseCurrency;
+                    bZero = false;
+                } else {//零数位的处理
+                    if (ChineseUnitIndex == 2)//元的处理(个位)
+                    {
+                        if (doubMoneyNumber > 0)//段中有数字
+                        {
+                            strChineseCurrency = straChineseUnit[ChineseUnitIndex] + strChineseCurrency;
+                            bZero = true;
+                        }
+                    } else if (ChineseUnitIndex == 6 || ChineseUnitIndex == 10)//万、亿数位的处理
+                    {
+                        if (doubMoneyNumber % 1000 > 0)
+                            strChineseCurrency = straChineseUnit[ChineseUnitIndex] + strChineseCurrency;//段中有数字
+                    }
+                    if (!bZero) strChineseCurrency = straChineseNumber[0] + strChineseCurrency; //前一数位非零的处理
+                    bZero = true;
+                }
+                doubMoneyNumber = Math.floor(doubMoneyNumber / 10);
+                ChineseUnitIndex++;
+            }
+            if (bNegative) strChineseCurrency = "负" + strChineseCurrency;//负数的处理
+        } catch (Exception e) {
+            return "";
+        }
+        return strChineseCurrency;
+    }
+
+    public static String getChinese(String s) {
+        if (s == null) return "";
+        try {
+            String convert = new String(s.getBytes("ISO8859_1"), "GB2312");
+            return convert;
+        } catch (Exception e) {
+        }
+        return s;
+    }
+
+    public static String getCharset(String s, String fromCharset1, String toCharset2) {
+        if (s == null) return "";
+        try {
+            String convert = new String(s.getBytes(fromCharset1), toCharset2);
+            return convert;
+        } catch (Exception e) {
+        }
+        return s;
+    }
+
+    public static String getSQLLike(String SQL) {
+        if (!SQL.equals("")) {
+            SQL = SQL.replace("Like '~!", "Like '%");
+            SQL = SQL.replace("~!')", "%')");
+        }
+        return SQL;
+    }
+
+    //返回给定的字符长度
+    //s:要截取的字符串
+    //LimitStrlen:长度
+    //IsReturnSpace:当s为null时是否返回" ";为true:要返回；false：不返回
+    //IsDouHao:返回值中是否将字符串中的上逗号'去掉   为true:要去掉；false：不去掉
+//    public static String getSaveStr(String s){boolean m;if(DBConnect.Ver==0)m=false;else m=true;return getLimitLenStr(s,0,m,true);}
+//    public static String getSaveStr(String s,int LimitStrlen){boolean m;if(DBConnect.Ver==0)m=false;else m=true;return getLimitLenStr(s,LimitStrlen,m,true);}
+    public static String getLimitLenStr(String s, int LimitStrlen) {
+        return getLimitLenStr(s, LimitStrlen, false);
+    }
+
+    public static String getLimitLenStr(String s, int LimitStrlen, boolean IsReturnSpace) {
+        return getLimitLenStr(s, LimitStrlen, IsReturnSpace, false);
+    }
+
+    public static String getLimitLenStr(String s, int LimitStrlen, boolean IsReturnSpace, boolean IsDouHao) {
+        if (s == null) if (IsReturnSpace == true) return " ";
+        else return "";
+        s = s.replace("'", "");
+        if (LimitStrlen != 0) {
+            char[] cc = s.toCharArray();
+            int intLen = 0;
+            int i;
+            //if("中国".length()==4){return s.substring(Maxlen/2);}
+            for (i = 0; i < cc.length; i++) {
+                if ((int) cc[i] > 255) {
+                    intLen = intLen + 2;
+                } else {
+                    intLen++;
+                }
+                if (intLen >= LimitStrlen) {
+                    break;
+                }
+            }
+            if (intLen == LimitStrlen) i++;
+            s = s.substring(0, i);
+        }
+        if (s.equals("")) if (IsReturnSpace == true) return s = " ";
+        if (IsDouHao == true) s = s.replace("'", "");
+        return s;
+    }
+
+    public static String getLimitChinese(String s, int MaxLen) {
+        if (s == null) return "";
+        try {
+            String convert = new String(s.getBytes("ISO8859_1"), "GB2312");
+            convert = getLimitLenStr(convert, MaxLen);
+            //String convert=getLimitLenStr(s,MaxLen);
+            return convert;
+        } catch (Exception e) {
+        }
+        return "";
+    }
+
+    public static String getNumber(String m) {
+        if (m == null) return "0";
+        m = m.trim();
+        if (m.equals("")) return "0";
+        return m;
+    }
+
+    public static String getNowDate() {
+        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar now = Calendar.getInstance();
+        return s.format(now.getTime()).toString();
+    }
+
+    public static String getNowDate(String format) {
+        SimpleDateFormat s = new SimpleDateFormat(format);
+        Calendar now = Calendar.getInstance();
+        return s.format(now.getTime()).toString();
+    }
+
+    public static String getDate(String m) {
+        if (m == null) return getNowDate();
+        m = m.trim();
+        if (m.equals("")) return getNowDate();
+        try {
+            SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd");
+            m = s.format(s.parse(m)).toString();
+        } catch (Exception e) {
+            m = getNowDate();
+        }
+        return m;
+    }
+
+    /**
+     * date 转换为时间串
+     *
+     * @param date
+     * @return
+     */
+    public static String getDateString(java.util.Date date) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String str = format.format(date);
+        return str;
+    }
+
+    /**
+     * 提供判断并返回值。
+     *
+     * @param w 源固定值
+     * @param m 变量值
+     */
+    public static String getSwitch(String Rstr, String w, String m) {
+        if (w.equals(m)) return Rstr;
+        else return "";
+    }
+
+    /**
+     * 提供精确的加法运算。
+     *
+     * @param v1 被加数
+     * @param v2 加数
+     * @return 两个参数的和
+     */
+    public static double add(double v1, double v2) {
+        BigDecimal b1 = new BigDecimal(Double.toString(v1));
+        BigDecimal b2 = new BigDecimal(Double.toString(v2));
+        return b1.add(b2).doubleValue();
+    }
+
+    /**
+     * 提供精确的减法运算。
+     *
+     * @param v1 被减数
+     * @param v2 减数
+     * @return 两个参数的差
+     */
+    public static double sub(double v1, double v2) {
+        BigDecimal b1 = new BigDecimal(Double.toString(v1));
+        BigDecimal b2 = new BigDecimal(Double.toString(v2));
+        return b1.subtract(b2).doubleValue();
+    }
+
+    /**
+     * 提供精确的乘法运算。
+     *
+     * @param v1 被乘数
+     * @param v2 乘数
+     * @return 两个参数的积
+     */
+    public static double mul(double v1, double v2) {
+        BigDecimal b1 = new BigDecimal(Double.toString(v1));
+        BigDecimal b2 = new BigDecimal(Double.toString(v2));
+        return b1.multiply(b2).doubleValue();
+    }
+
+    /**
+     * 提供（相对）精确的除法运算，当发生除不尽的情况时，精确到
+     * 小数点以后10位，以后的数字四舍五入。
+     *
+     * @param v1 被除数
+     * @param v2 除数
+     * @return 两个参数的商
+     */
+    public static double div(double v1, double v2) {
+        return div(v1, v2, 10);
+    }
+
+    /**
+     * 提供（相对）精确的除法运算。当发生除不尽的情况时，由scale参数指
+     * 定精度，以后的数字四舍五入。
+     *
+     * @param v1    被除数
+     * @param v2    除数
+     * @param scale 表示表示需要精确到小数点以后几位。
+     * @return 两个参数的商
+     */
+    public static double div(double v1, double v2, int scale) {
+        if (scale < 0) {
+            throw new IllegalArgumentException("The scale must be a positive integer or zero");
+        }
+        BigDecimal b1 = new BigDecimal(Double.toString(v1));
+        BigDecimal b2 = new BigDecimal(Double.toString(v2));
+        return b1.divide(b2, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    /**
+     * 提供精确的小数位四舍五入处理。
+     *
+     * @param v     需要四舍五入的数字
+     * @param scale 小数点后保留几位
+     * @return 四舍五入后的结果
+     */
+    public static double round(double v, int scale) {
+        if (scale < 0) {
+            throw new IllegalArgumentException("The scale must be a positive integer or zero");
+        }
+        BigDecimal b = new BigDecimal(Double.toString(v));
+        BigDecimal one = new BigDecimal("1");
+        return b.divide(one, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    /**
+     * 提供精确的格式化小数位四舍五入处理。
+     *
+     * @param v      需要四舍五入的数字
+     * @param scale  小数点后保留几位
+     * @param Format 输出的格式 如保留小数点后2位"#.00"
+     * @return 四舍五入后的格式化结果
+     */
+    public static String round(double v, int scale, String Format) {
+        if (scale < 0) {
+            throw new IllegalArgumentException("The scale must be a positive integer or zero");
+        }
+        BigDecimal b = new BigDecimal(Double.toString(v));
+        BigDecimal one = new BigDecimal("1");
+        DecimalFormat df1 = new DecimalFormat(Format);
+        return df1.format(b.divide(one, scale, BigDecimal.ROUND_HALF_UP).doubleValue());
+    }
+
+    /**
+     * 提供精确的格式化小数位处理。
+     *
+     * @param v      需要四舍五入的数字
+     * @param Format 输出的格式 如保留小数点后2位"#.00"
+     * @return 四舍五入后的格式化结果
+     */
+    public static String round(double v, String Format) {
+        DecimalFormat df1 = new DecimalFormat(Format);
+        return df1.format(v);
+    }
+
+    public static String getName(Connection con, String sql) {
+        String name = "";
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs != null) {
+                if (rs.next()) {
+                    name = rs.getString(1);
+                }
+                rs.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            stmt.close();
+        } catch (Exception ww) {
+        }
+        return name;
+    }
+
+    public static File[] getAllUpFiles(HttpSession session) {
+        File f = new File(session.getServletContext().getRealPath("/") + "Editor/UploadFile/" + session.getId());
+        if (!f.exists()) return new File[0];
+        else return f.listFiles();
+    }
+
+    public static void deleteDirectory(File dir) throws IOException {
+        if ((dir == null) || !dir.isDirectory()) {
+            return;
+        }
+        File[] entries = dir.listFiles();
+        int sz = entries.length;
+        for (int i = 0; i < sz; i++) {
+            if (entries[i].isDirectory()) {
+                deleteDirectory(entries[i]);
+            } else {
+                entries[i].delete();
+            }
+        }
+        dir.delete();
+    }
+
+    public static String getAsstring(String str, int n) {
+        if (str.length() > n) return str.substring(0, n);
+        else return str;
+    }
+
+    public static String getIpAddr(HttpServletRequest request) {
+        String ip = "";
+        try {
+            ip = request.getHeader("x-forwarded-for");
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("Proxy-Client-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("WL-Proxy-Client-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getRemoteAddr();
+            }
+            String a[] = ip.split("\\.");
+            for (int i = 0; i < 4; i++) {
+                if (a[i].trim().length() == 2) a[i] = "0" + a[i].trim();
+                if (a[i].trim().length() == 1) a[i] = "00" + a[i].trim();
+            }
+            ip = a[0] + "." + a[1] + "." + a[2] + "." + a[3];
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ip;
+    }
+
+    public static String getIpAddrass(HttpServletRequest request) {
+        String ip = "";
+        try {
+            ip = request.getHeader("x-forwarded-for");
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("Proxy-Client-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getHeader("WL-Proxy-Client-IP");
+            }
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                ip = request.getRemoteAddr();
+            }
+//    	String a[]=ip.split("\\.");
+//    	for(int i=0;i<4;i++){
+//    		if(a[i].trim().length()==2) a[i]="0"+a[i].trim();
+//    		if(a[i].trim().length()==1) a[i]="00"+a[i].trim();
+//    	}
+//		ip= a[0]+"."+a[1]+"."+a[2]+"."+a[3];
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ip;
+    }
+
+
+    /**
+     * 获取字符串的长度，如果有中文，则每个中文字符计为2位
+     *
+     * @param value 指定的字符串
+     * @return 字符串的长度
+     */
+    public static int length(String value) {
+        int valueLength = 0;
+        String chinese = "[\u0391-\uFFE5]";
+        /* 获取字段值的长度，如果含中文字符，则每个中文字符长度为2，否则为1 */
+        for (int i = 0; i < value.length(); i++) {
+            /* 获取一个字符 */
+            String temp = value.substring(i, i + 1);
+            /* 判断是否为中文字符 */
+            if (temp.matches(chinese)) {
+                /* 中文字符长度为2 */
+                valueLength += 2;
+            } else {
+                /* 其他字符长度为1 */
+                valueLength += 1;
+            }
+        }
+        return valueLength;
+    }
+
+    /*
+    public static String getIpProvince(String ip){
+    	String province="";
+		Statement stmt=null;
+		ResultSet rs=null;
+    	DBConnect db = new DBConnect();
+    	try{
+    		stmt=db.con.createStatement();
+    		rs=stmt.executeQuery("select IP_PROVINCE from T_PROVINCEIP where '"+ip+"'>IP_FROM and '"+ip+"'<IP_END");
+    		if(rs!=null){		
+    			if(rs.next()){
+    				province=rs.getString("IP_PROVINCE");
+    			}
+    			rs.close();	
+    		}else{
+    			province="未知地区";
+    		}
+    	}catch(Exception e){}
+		try{stmt.close();}catch(Exception e1){}
+		db.CloseDataBase();
+		return province;
+    }
+    public static String[] getIpCity(String ip){
+    	String city[]={"",""};
+		Statement stmt=null;
+		ResultSet rs=null;
+    	DBConnect db = new DBConnect();
+    	try{
+    		stmt=db.con.createStatement();
+    		rs=stmt.executeQuery("select IP_CITY,IP_PROVINCE from T_CITYIP where '"+ip+"'>IP_FROM and '"+ip+"'<IP_END");
+    		if(rs!=null){		
+    			if(rs.next()){
+    				city[0]=rs.getString("IP_CITY");
+    				city[1]=rs.getString("IP_PROVINCE");
+    			}
+    			rs.close();	
+    		}else{
+    			city[0]="未知地区";city[1]="未知地区";
+    		}
+    	}catch(Exception e){}
+		try{stmt.close();}catch(Exception e1){}
+		db.CloseDataBase();
+		return city;
+    }
+    */
+//    public static String getIpArea(String ip){
+//    	String area="";
+//		Statement stmt=null;
+//		ResultSet rs=null;
+//    	DBConnect db = new DBConnect();
+//    	try{
+//    		stmt=db.con.createStatement();
+//    		rs=stmt.executeQuery("select IP_AREA from T_IPAREA where type='3' AND IP_STATUS='1' AND '"+ip+"'>=IP_FROM and '"+ip+"'<=IP_END");
+//    		if(rs!=null){
+//    			if(rs.next()){
+//    				area=rs.getString("IP_AREA");
+//    			}else{area="unkown";}
+//    			rs.close();
+//    		}else{area="unkown";}
+//
+//    		if(area.equals("unkown")){
+//	    		rs=stmt.executeQuery("select IP_AREA from T_IPAREA where type='2' AND IP_STATUS='1' and '"+ip+"'>=IP_FROM and '"+ip+"'<=IP_END");
+//	    		if(rs!=null){
+//	    			if(rs.next()){
+//	    				area=rs.getString("IP_AREA");
+//	    			}else{area="unkown";}
+//	    			rs.close();
+//	    		}else{area="unkown";}
+//    		}
+//
+//    		if(area.equals("unkown")){
+//	    		rs=stmt.executeQuery("select IP_AREA from T_IPAREA where type='1' AND IP_STATUS='1' and '"+ip+"'>=IP_FROM and '"+ip+"'<=IP_END");
+//	    		if(rs!=null){
+//	    			if(rs.next()){
+//	    				area=rs.getString("IP_AREA");
+//	    			}else{area="unkown";}
+//	    			rs.close();
+//	    		}else{area="unkown";}
+//    		}
+//
+//    	}catch(Exception e){e.printStackTrace();}
+//		try{stmt.close();}catch(Exception e1){}
+//		db.CloseDataBase();
+//		if (area.equals(""))area=" ";
+//		return area;
+//    }
+//
+//	public static int isUpSFZ(String PassportID){
+//		int i=-1;
+//		Statement stmt=null;
+//		ResultSet rs=null;
+//		DBConnect db=new DBConnect();
+//		try{
+//			stmt=db.con.createStatement();
+//			rs=stmt.executeQuery("select SFZ_STATUS from T_SFZ where PASSPORT_ID='"+PassportID+"'");
+//			if(rs!=null){if(rs.next()){
+//				i=rs.getInt(1);
+//			}rs.close();}
+//		}catch(Exception e1){e1.printStackTrace();};
+//		try{stmt.close();}catch(Exception ee){}
+//		db.CloseDataBase();
+//		return i;
+//	}
+
+    //new add
+    public static String escape(String src) {
+        int i;
+        char j;
+        StringBuffer tmp = new StringBuffer();
+        tmp.ensureCapacity(src.length() * 6);
+        for (i = 0; i < src.length(); i++) {
+            j = src.charAt(i);
+            if (Character.isDigit(j) || Character.isLowerCase(j)
+                    || Character.isUpperCase(j))
+                tmp.append(j);
+            else if (j < 256) {
+                tmp.append("%");
+                if (j < 16)
+                    tmp.append("0");
+                tmp.append(Integer.toString(j, 16));
+            } else {
+                tmp.append("%u");
+                tmp.append(Integer.toString(j, 16));
+            }
+        }
+        return tmp.toString();
+    }
+
+    public static String unescape(String src) {
+        StringBuffer tmp = new StringBuffer();
+        tmp.ensureCapacity(src.length());
+        int lastPos = 0, pos = 0;
+        char ch;
+        while (lastPos < src.length()) {
+            pos = src.indexOf("%", lastPos);
+            if (pos == lastPos) {
+                if (src.charAt(pos + 1) == 'u') {
+                    ch = (char) Integer.parseInt(src.substring(pos + 2, pos + 6), 16);
+                    tmp.append(ch);
+                    lastPos = pos + 6;
+                } else {
+                    ch = (char) Integer.parseInt(src.substring(pos + 1, pos + 3), 16);
+                    tmp.append(ch);
+                    lastPos = pos + 3;
+                }
+            } else {
+                if (pos == -1) {
+                    tmp.append(src.substring(lastPos));
+                    lastPos = src.length();
+                } else {
+                    tmp.append(src.substring(lastPos, pos));
+                    lastPos = pos;
+                }
+            }
+        }
+        return tmp.toString();
+    }
+//
+//    /**
+//     * 获取数据库字段具体标识值
+//     *
+//     * @param keyone
+//     * @param keyTwo
+//     * @return
+//     */
+//    public static String getDbDictValue(String keyone, String keyTwo) {
+//        String value = "";
+//        value = GlobleData.DbDictMap.get(keyone).get(keyTwo);
+//        return value;
+//    }
+//
+//    /**
+//     * 获取数据库字段标识Map
+//     *
+//     * @param keyone
+//     * @return
+//     */
+//    public static Map<String, String> getDbDictMap(String keyone) {
+//        return GlobleData.DbDictMap.get(keyone);
+//    }
+//
+//    /**
+//     * 获取全部省列表数据
+//     *
+//     * @return map   key:areaid  value:名称
+//     */
+//    public static Map<String, String> getProvinceMap() {
+//        Map<String, String> map = new ConcurrentHashMap<String, String>();
+//        for (String proId : GlobleData.ProvinceList) {
+//            map.put(proId, GlobleData.areaSource.get(proId));
+//        }
+//        return map;
+//    }
+//
+//    /**
+//     * 获取某省下属市级列表数据
+//     *
+//     * @param proID
+//     * @return map   key:areaid  value:名称
+//     */
+//    public static Map<String, String> getProCityMap(String proID) {
+//        Map<String, String> map = new ConcurrentHashMap<String, String>();
+//        for (String cityId : GlobleData.CityMap.get(proID)) {
+//            map.put(cityId, GlobleData.areaSource.get(cityId));
+//        }
+//        return map;
+//    }
+//
+//    /**
+//     * 获取某市下属地区列表数据
+//     *
+//     * @param cityID
+//     * @return map   key:areaid  value:名称
+//     */
+//    public static Map<String, String> getAreaMap(String cityID) {
+//        Map<String, String> map = new ConcurrentHashMap<String, String>();
+//        for (String areaid : GlobleData.areaMap.get(cityID)) {
+//            map.put(areaid, GlobleData.areaSource.get(areaid));
+//        }
+//        return map;
+//    }
+//
+//    /**
+//     * 返回某地区的名称
+//     *
+//     * @param areaId
+//     * @return
+//     */
+//    public static String getAreaName(String areaId) {
+//        return GlobleData.areaSource.get(areaId);
+//    }
+
+
+    /**
+     * 隐藏字符串的字符
+     *
+     * @param str
+     * @param begin
+     * @param end
+     * @return
+     */
+    public static String getHiddenStr(String str, int begin, int end) {
+        String newStr = "";
+        String temp = str.substring(end);
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < end; i++) {
+            stringBuffer.append("*");
+        }
+        stringBuffer.append(temp);
+        newStr = stringBuffer.toString();
+        return newStr;
+    }
+
+
+    public static void main(String[] args) {
+//        String tmp = "~!@#$%^&*()_+|\\=-,./?><;'][{}\"";
+//        System.out.println("testing escape : " + tmp);
+//        tmp = escape(tmp);
+//        System.out.println(tmp);
+//        System.out.println("testing unescape :" + tmp);
+//        System.out.println(unescape(tmp));
+//        System.out.println(getSqlTime("2011-07-28 09:23:24"));
+        Double x1 = new Double(33);
+        Double x2 = new Double(33);
+        if (x1 == x2) {
+            System.out.println(123);
+        }
+
+//        System.out.println(new Tools(0).getTimeStamp());
+//        System.out.println(System.currentTimeMillis());
+    }
+
+
+}

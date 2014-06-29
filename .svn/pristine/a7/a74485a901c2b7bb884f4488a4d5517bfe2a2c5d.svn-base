@@ -1,0 +1,186 @@
+package com.qk.dao.impl;
+
+import com.qk.bean.RfpInfoCommentBean;
+import com.qk.dao.RfpInfoCommentDao;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RfpInfoCommentDaoImp implements RfpInfoCommentDao {
+
+    private DataSource dataSource;
+
+    private PreparedStatement preparedStatement;
+
+    public RfpInfoCommentDaoImp(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * 会获得与 一个团队招标 相关的评论的数量
+     *
+     * @return
+     */
+    @Override
+    public Integer getCount(Integer rfpInfoId) {
+        Connection connection = null;
+        int count = 0;
+        String sql = "select count(*) as countNum from rfp_info_comment WHERE rfp_info_id=" + rfpInfoId;
+        ResultSet resultSet = null;
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("countNum");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public List<RfpInfoCommentBean> getRfpInfoCommentList(Integer pageNumber, Integer pageSize, Integer rfpInfoId) {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        List<RfpInfoCommentBean> list = new ArrayList<RfpInfoCommentBean>();
+
+        String sql = "SELECT * FROM (SELECT ROWNUM AS rn, t.* FROM (SELECT * FROM " +
+                "(select t2.*, t3.user_name from  rfp_info_comment t2,t_user t3  " +
+                "WHERE t2.user_id= t3.user_id AND t2.rfp_info_id=?) " +
+                "ORDER BY ric_posted asc) t )  WHERE rn BETWEEN " + ((pageNumber - 1) * pageSize + 1) + " AND " + (pageNumber * pageSize);
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1, rfpInfoId);
+            resultSet = this.preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                RfpInfoCommentBean obj = new RfpInfoCommentBean();
+
+                String ricContent = resultSet.getString("ric_content");
+                String ricPosted = resultSet.getString("ric_posted");
+                String ricRemark = resultSet.getString("ric_remark");
+                Integer rfpInfoId1 = resultSet.getInt("rfp_info_id");
+                Integer userId = resultSet.getInt("user_id");
+                String userName = resultSet.getString("user_name");
+                ;
+
+
+                obj.setRicContent(ricContent);
+                obj.setRicPosted(ricPosted);
+                obj.setRicRemark(ricRemark);
+                obj.setRfpInfoId(rfpInfoId1);
+                obj.setUserId(userId);
+                obj.setUserName(userName);
+
+                list.add(obj);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public Boolean insert(RfpInfoCommentBean rfpInfoCommentBean) {
+        Connection connection = null;
+        boolean flag = false;
+        String sql = "insert into rfp_info_comment(user_id,rfp_info_id,ric_content,ric_posted,ric_remark)" +
+                " values (?,?,?,?,?)";
+        ResultSet resultSet = null;
+        System.out.println(sql);
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1, rfpInfoCommentBean.getUserId());
+            this.preparedStatement.setInt(2, rfpInfoCommentBean.getRfpInfoId());
+            this.preparedStatement.setString(3, rfpInfoCommentBean.getRicContent());
+            this.preparedStatement.setString(4, rfpInfoCommentBean.getRicPosted());
+            this.preparedStatement.setString(5, rfpInfoCommentBean.getRicRemark());
+            flag = this.preparedStatement.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return flag;
+    }
+
+    @Override
+    public List<RfpInfoCommentBean> getOnlyAllComment(Integer rfpInfoId) {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        List<RfpInfoCommentBean> list = new ArrayList<RfpInfoCommentBean>();
+        if (rfpInfoId > 0) {
+            String sql = "select t1.user_id,t2.user_name,t2.user_type from t_user t2,(select distinct user_id from rfp_info_comment where rfp_info_id=?) t1 where t1.user_id = t2.user_id ";
+            try {
+                connection = dataSource.getConnection();
+                this.preparedStatement = connection.prepareStatement(sql);
+                this.preparedStatement.setInt(1, rfpInfoId);
+                resultSet = this.preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    RfpInfoCommentBean obj = new RfpInfoCommentBean();
+
+                    Integer userId = resultSet.getInt("user_id");
+                    String userName = resultSet.getString("user_name");
+                    String userType = resultSet.getString("user_type");
+
+                    obj.setRfpInfoId(rfpInfoId);
+                    obj.setUserId(userId);
+                    obj.setUserName(userName);
+                    obj.setUserType(userType);
+                    list.add(obj);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (this.preparedStatement != null) {
+                    try {
+                        resultSet.close();
+                        preparedStatement.close();
+                        connection.close();
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
+
+        return list;
+    }
+
+}

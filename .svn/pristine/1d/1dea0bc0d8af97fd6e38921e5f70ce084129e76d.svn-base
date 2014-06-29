@@ -1,0 +1,29 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<div class="footer black">
+        <div class="footer-li">
+            <div class="module">
+                <ul>
+                    <li>
+                        <strong><a>关于我们</a></strong>
+                    </li>
+                    <li>
+                        <strong><a>网站地图</a></strong>
+                    </li>
+                    <li>
+                        <strong><a>联系我们</a></strong>
+                    </li>
+                    <li>
+                        <strong><a>友情链接</a></strong>
+                    </li>
+                    <li>
+                        <strong><a>法律声明</a></strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="wrapper">
+            &copy; 2001-2013 版权所有 <font class="danley"><a href="/index.action">QuickKnowledge</a></font>
+            地址：重庆市南岸区崇文路2号 邮编：400065
+        </div>
+</div>
+

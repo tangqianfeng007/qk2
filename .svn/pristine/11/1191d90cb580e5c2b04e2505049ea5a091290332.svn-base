@@ -1,0 +1,248 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8" %>
+<%@ page import="com.qk.bean.EventBean" %>
+<%@ page import="com.qk.dao.proxy.EventDaoProxy" %>
+<%@ page import="com.qk.dao.proxy.PublicationDaoProxy" %>
+<%@ page import="com.qk.bean.PublicationsBean" %>
+<%@ page import="com.qk.dao.proxy.UserDaoProxy" %>
+<%@ page import="com.qk.bean.User" %>
+<%@ page import="com.qk.dao.proxy.SiteCommentDaoProxy" %>
+<%@ page import="com.qk.bean.SiteCommentBean" %>
+<%@ taglib uri="http://www.opensymphony.com/sitemesh/decorator" prefix="decorator" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=7"/>
+    <%--<title><decorator:title/></title>--%>
+    <title>QuickKnowledge </title>
+
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <link rel="Shortcut Icon" href="../images/favicon.ico">
+    <link rel="stylesheet" href="../css/cutter.css">
+
+    <script src="../js/jquery-1.3.2.min.js" async="true"></script>
+    <script src="../js/cutter.js" async="true"></script>
+    <script src="../js/placeholder.js" async="true"></script>
+    <script src="../js/selectBar.js" async="true"></script>
+
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="wrapper">
+        <div class="logo">
+            <a href="./index.html">QuickKnowledge</a>
+        </div>
+        <div class="module">
+            <ul>
+                <li>
+                    <strong><a href="./index.html" class="selected">首页</a></strong>
+                </li>
+                <li>
+                    <strong><a href="news.html">新闻</a></strong>
+                </li>
+                <li>
+                    <strong><a href="page.html">活动</a></strong>
+                </li>
+                <li>
+                    <strong><a href="archive.html">出版物</a></strong>
+                </li>
+                <li>
+                    <strong><a href="page.html">专家</a></strong>
+                </li>
+                <li>
+                    <strong><a href="page.html">站点评论</a></strong>
+                </li>
+            </ul>
+
+        </div>
+        <div class="sub">
+            <input type="text" placeholder="专家搜索" class="text">
+            <input type="button" value="搜索" class="button">
+            <!--搜索专家：<a href="###">登陆</a>-->
+            <!--<a href="###">注册</a>-->
+        </div>
+    </div>
+</div>
+
+
+<div class="wrapper">
+    <div class="row">
+        <div class="three">
+            <form action="/myStruts/login.action" method="post">
+                <ul class="sidebar">
+
+                    <li class="selected"
+                        style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+                        登录
+                    </li>
+                    <li class="selected">
+                        <p>
+                            <input id="username" type="text" placeholder="用户名" name="logBean.username" tabindex="1"
+                                   class="text"
+                                   style="width: 92%;" autocomplete="off">
+                        </p>
+
+                        <p>
+                            <input id="pwd" type="password" placeholder="密码" name="logBean.password" tabindex="1"
+                                   class="text"
+                                   style="width: 92%;" autocomplete="off">
+                        </p>
+
+                        <p>
+                            <input placeholder="验证码" type="text" name="code" id="code" class="text" tabindex="1"
+                                   style="width: 22%;"/>
+                            <img id='mask' src="/ajax/checkCode.action?rand=1.0" alt="点击刷新"
+                                 onclick="javascript:this.src='/ajax/checkCode.action?rand='+Math.random()"
+                                 style="cursor:pointer; vertical-align:top; width:63px;height: 32px; margin-left:5px;padding: 0px;"/>
+                        </p>
+                        <input type="submit" value="登录" class="button">&nbsp;&nbsp;<input type="reset" value="注册"
+                                                                                          class="button">
+                    </li>
+                    <li class="selected"
+                        style="background-color: #F6F6F6;cursor: pointer;color: #1570A6;font-size: 18px;">
+                        &nbsp;<s:property value="#parameters.error" /></li>
+                </ul>
+            </form>
+
+        </div>
+        <decorator:body/>
+        <div class="three">
+            <h4>活动前五排行榜</h4>
+
+            <div class="bordered">
+                <ul>
+                    <%
+                        List eventList = new EventDaoProxy().eventsTopTen();
+                        for(Object obect:eventList){
+                            EventBean eventBean = (EventBean)obect;
+                            String title = eventBean.getEventTitle();
+                            if(title.length()>=8){
+                                 eventBean.setEventTitle(title.substring(0,6)+"...");
+                            }
+                    %>
+                    <li>
+                        <span class="top_title"><a href="/myStruts/showEventContent.action?id=<%=eventBean.getEventId()%>"><%=eventBean.getEventTitle()%></a></span>
+                        <span class="point_num" >点击数：<%=eventBean.getEventCount()%></span></li>
+                    <%
+                        }
+                    %>
+                </ul>
+            </div>
+
+
+            <h4>出版物前五排行榜</h4>
+
+            <div class="bordered">
+                <ul>
+                    <%
+                        List pubList = new PublicationDaoProxy().publicationsTopTen();
+                        for(Object obect:pubList){
+                            PublicationsBean pubBean = (PublicationsBean)obect;
+                            String title = pubBean.getPubTitle();
+                            if(title.length()>=8){
+                                pubBean.setPubTitle(title.substring(0, 6) + "...");
+                            }
+                    %>
+                    <li>
+                        <span class="top_title"><a href="/myStruts/showPubContent.action?id=<%=pubBean.getPubId()%>"><%=pubBean.getPubTitle()%></a></span>
+                        <span class="point_num" >点击数：<%=pubBean.getPubCount()%></span></li>
+                    <%
+                        }
+                    %>
+
+                </ul>
+            </div>
+            <h4>专家前五排行榜</h4>
+
+            <div class="bordered">
+                <ul>
+                    <%
+                        List expertList = new UserDaoProxy().expertTopTen();
+                        for(Object obect:expertList){
+                            User user = (User)obect;
+                            String name = user.getUsername();
+                            if(name.length()>=8){
+                                user.setUsername(name.substring(0, 6) + "...");
+                            }
+                    %>
+                    <li>
+                        <span class="top_title"><a href="/myStruts/showUserContent.action?id=<%=user.getId()%>"><%=user.getUsername()%></a></span>
+                        <span class="point_num" >热门度：<%=user.getHot_value()%></span></li>
+                    <%
+                        }
+                    %>
+
+                </ul>
+            </div>
+
+            <h4>站点评论</h4>
+
+            <div class="bordered">
+                <ul>
+                    <%
+                        List comList = new SiteCommentDaoProxy().commentTopTen();
+                        for(Object obect:comList){
+                            SiteCommentBean siteCommentBean = (SiteCommentBean) obect;
+                            String title = siteCommentBean.getScTitle();
+                            if(title.length()>=8){
+                                siteCommentBean.setScTitle(title.substring(0, 6) + "...");
+                            }
+                    %>
+                    <li>
+                        <span class="top_title"><a href="/myStruts/showCommentContent.action?id=<%=siteCommentBean.getScId()%>"><%=siteCommentBean.getScTitle()%></a></span>
+                        <span class="point_num" >点击数：<%=siteCommentBean.getScCount()%></span></li>
+                    <%
+                        }
+                    %>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="footer black">
+    <div class="footer-li">
+        <ul style="list-style: none; text-align:center;">
+            <li>
+                <a>关于我们</a>
+            </li>
+            <li>
+                |
+            </li>
+            <li>
+                <a> 网站地图</a>
+            </li>
+            <li>
+                |
+            </li>
+            <li>
+                <a> 联系我们 </a>
+            </li>
+            <li>
+                |
+            </li>
+            <li>
+                <a> 友情链接 </a>
+            </li>
+            <li>
+                |
+            </li>
+            <li>
+                <a> 法律声明 </a>
+            </li>
+        </ul>
+    </div>
+    <div class="wrapper">
+        &copy; 2001-2013 版权所有 <font class="danley"><a href="http://www.QuickKnowledge.com">QuickKnowledge</a></font>
+        地址：重庆市南岸区崇文路2号 邮编：400065
+    </div>
+</div>
+</body>
+</html>

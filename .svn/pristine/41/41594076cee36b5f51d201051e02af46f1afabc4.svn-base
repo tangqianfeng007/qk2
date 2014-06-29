@@ -1,0 +1,357 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.qk.bean.*;
+import com.qk.common.Page;
+import com.qk.common.PageTool;
+import com.qk.common.Tools;
+import com.qk.dao.DaoFactory;
+import com.qk.dao.RfpInfoCommentDao;
+import com.qk.dao.VirtualTeamDao;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.json.annotations.JSON;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: zheng
+ * Date: 13-8-8
+ * Time: 下午7:31
+ * To change this template use File | Settings | File Templates.
+ */
+public class VirtualTeamAction extends ActionSupport {
+    private int status = 0;
+    private String addUserIds;//团队新人员名单，userId之间使用逗号相隔，处理为先删除以前的成员，然后添加新的
+    private Integer actUserId;//团队成员操作的id，可能为新增，可能为删除，看具体的调用方法
+    private Integer teamId;//团队id
+    private Integer rfpId;//
+    private ArrayList<VtMemberBean> memberList;
+    private VirtualTeamBean virtualTeamBean;
+    private List<RfpInfoCommentBean> commentList;
+    private List<VirtualTeamBean> teamList;
+
+    private String pageTools=null;
+    private int pageNumber=1; //pageNumber代表是哪一页
+    private int pageSize=10;  //pageSize代表一页中显示多少条数据
+
+    public String getMyTeam()
+   {
+       User user=(User) ActionContext.getContext().getSession().get("msg");
+       if(user==null){
+           HttpServletResponse response = ServletActionContext.getResponse();
+           try {
+               response.sendRedirect("/index.action");
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+           return null;
+       }
+
+       VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+
+       int count=virtualTeamDao.getCount(user.getId());
+       teamList = virtualTeamDao.getMyTeamByUserId(pageNumber, pageSize, user.getId());
+
+       Page page = new Page(pageNumber, count, pageSize, teamList);
+       PageTool pt = new PageTool();
+       pageTools = pt.getPageString("/team/getMyTeam.action", page);
+
+       return SUCCESS;
+   }
+
+    public String doEditTeam()
+    {
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        if(virtualTeamBean != null && virtualTeamBean.getVtId() != null && virtualTeamBean.getVtId() > 0)
+        {
+            this.status =  DaoFactory.virtualTeamDao.updateTeam(virtualTeamBean);
+        }
+        return SUCCESS;
+    }
+
+    /**
+     * 通过RFP_id获取团队信息和团队下的所有成员
+     * @return
+     */
+    public String getTeamAndMembers()
+    {
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+        RfpInfoCommentDao rfpInfoCommentDao = DaoFactory.rfpInfoCommentDao;
+        if(rfpId != null && rfpId > 0)
+        {
+            Map<String,Object> map = virtualTeamDao.getByRfpId(rfpId);
+            commentList = rfpInfoCommentDao.getOnlyAllComment(rfpId);//评论者，去重
+            status = (Integer)(map.get("status"));
+            memberList = (ArrayList)(map.get("memberList"));
+            virtualTeamBean = (VirtualTeamBean)(map.get("virtualTeamBean"));
+
+            if(memberList != null && commentList != null)
+            {
+                for(RfpInfoCommentBean commentBean:commentList)
+                {
+                    int i = 0;
+                    for(VtMemberBean mb:memberList)
+                    {
+                         if(commentBean.getUserId() == mb.getUserId())
+                         {
+                             i=1;
+                             break;
+                         }
+                    }
+                    commentBean.setStatus(i);//设置为未被加入团队
+                }
+
+            }
+        }
+        else {
+            status =-1;
+        }
+
+        return SUCCESS;
+    }
+
+    public String createTeam()
+    {
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+        if(virtualTeamBean != null && virtualTeamBean.getRfpInfoId() > 0)
+        {
+            virtualTeamBean.setVtRemark("备注");
+            virtualTeamBean.setVtCreateTime(Tools.getNowDate());
+            virtualTeamBean.setVtStatus("创建");
+            status = virtualTeamDao.insertTeam(virtualTeamBean);
+        }
+        return SUCCESS;
+    }
+
+
+    /**
+     * 增加一个新成员   actUserId
+     * @return
+     */
+    public String addRFPMember()
+    {
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+        VtMemberBean memberBean = new VtMemberBean();
+        memberBean.setUserId(actUserId);
+        memberBean.setVtId(teamId);
+        status = virtualTeamDao.addOneMember(memberBean);
+        return SUCCESS;
+    }
+
+    /**
+     * 删除一个成员  actUserId
+     * @return
+     */
+    public String delRFPMember()
+    {
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+        status = virtualTeamDao.delOneMember(teamId, actUserId);
+
+        return SUCCESS;
+    }
+
+    /**
+     * 更新所有团队成员 addUserIds
+     * @return
+     */
+    public String addRFPMemberList()
+    {
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        String[] idsStr = addUserIds.split(",");
+        ArrayList<Integer> ids = new ArrayList<Integer>();
+        for(String uid:idsStr)
+        {
+            if(!uid.equals(""))
+            {
+                ids.add(Integer.parseInt(uid));
+            }
+        }
+        VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+        status = virtualTeamDao.updateMember(teamId, ids);
+        return SUCCESS;
+    }
+
+    public String deleteTeam(){
+        User user=(User) ActionContext.getContext().getSession().get("msg");
+        if(user==null){
+            HttpServletResponse response = ServletActionContext.getResponse();
+            try {
+                response.sendRedirect("/index.action");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        if(teamId != null && teamId > 0)
+        {
+            VirtualTeamDao virtualTeamDao = DaoFactory.virtualTeamDao;
+            status  = virtualTeamDao.deleteTeam(teamId);
+        }
+        return SUCCESS;
+    }
+    public List<VirtualTeamBean> getTeamList() {
+        return teamList;
+    }
+
+    public void setTeamList(List<VirtualTeamBean> teamList) {
+        this.teamList = teamList;
+    }
+
+    public ArrayList<VtMemberBean> getMemberList() {
+        return memberList;
+    }
+
+    public void setMemberList(ArrayList<VtMemberBean> memberList) {
+        this.memberList = memberList;
+    }
+
+    public VirtualTeamBean getVirtualTeamBean() {
+        return virtualTeamBean;
+    }
+
+    public void setVirtualTeamBean(VirtualTeamBean virtualTeamBean) {
+        this.virtualTeamBean = virtualTeamBean;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getAddUserIds() {
+        return addUserIds;
+    }
+
+    public void setAddUserIds(String addUserIds) {
+        this.addUserIds = addUserIds;
+    }
+
+    public Integer getActUserId() {
+        return actUserId;
+    }
+
+    public void setActUserId(Integer actUserId) {
+        this.actUserId = actUserId;
+    }
+
+    public Integer getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Integer teamId) {
+        this.teamId = teamId;
+    }
+
+    public Integer getRfpId() {
+        return rfpId;
+    }
+
+    public void setRfpId(Integer rfpId) {
+        this.rfpId = rfpId;
+    }
+
+    public List<RfpInfoCommentBean> getCommentList() {
+        return commentList;
+    }
+
+    public void setCommentList(List<RfpInfoCommentBean> commentList) {
+        this.commentList = commentList;
+    }
+
+    public String getPageTools() {
+        return pageTools;
+    }
+
+    public void setPageTools(String pageTools) {
+        this.pageTools = pageTools;
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+}

@@ -1,0 +1,135 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.qk.bean.CallforbitBean;
+import com.qk.bean.CfbCommentBean;
+import com.qk.bean.User;
+import com.qk.common.Page;
+import com.qk.common.PageTool;
+import com.qk.common.Tools;
+import com.qk.dao.CallforbitDao;
+import com.qk.dao.CfbCommentDao;
+import com.qk.dao.DaoFactory;
+import org.apache.struts2.ServletActionContext;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.List;
+
+/**
+ * 招标列表
+ */
+public class BidsListReview extends ActionSupport {
+
+    /**
+     * pageNumber代表是哪一页
+     * pageSize代表一页中显示多少条数据
+     */
+    private int pageNumber = 1;
+    private int pageSize = 6;
+    private String pageTools = null;
+    private Integer cfbId;
+    private List<CfbCommentBean> lists = null;
+    private String content = null;
+    private String cfbStatus = null;
+
+
+    public String bidsReview() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        CfbCommentDao cfbCommentDao = DaoFactory.cfbCommentDao;
+        CallforbitDao callforbitDao = DaoFactory.callforbitDao;
+        CallforbitBean callforbitBean = callforbitDao.getCallforbitBycfbId(cfbId);
+        cfbStatus = callforbitBean.getCfbStatus();
+        int count = cfbCommentDao.getCfbCommentCount(cfbId);
+        List<CfbCommentBean> list = cfbCommentDao.getCfbCommentBycfbId(pageNumber, 6, cfbId);
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("/bids/bidsReview!bidsComments.action", page);
+        this.lists = page.getResult();
+        return "bidsComments";
+    }
+
+    public String respondBidsComment() {
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+
+        CfbCommentDao cfbCommentDao = DaoFactory.cfbCommentDao;
+        boolean flag = false;
+        CfbCommentBean cfbCommentBean = new CfbCommentBean();
+        if (user != null) {
+            cfbCommentBean.setUserId(user.getId());
+        }
+        cfbCommentBean.setCfbId(cfbId);
+        cfbCommentBean.setCfbCContent(content);
+        cfbCommentBean.setCfbCPosted(Tools.getNowDate());
+        cfbCommentBean.setCfbCRemark("备注");
+
+        flag = cfbCommentDao.insertCfbCommentBycfbIdAnduserID(cfbCommentBean);
+
+        int count = cfbCommentDao.getCfbCommentCount(cfbId);
+        List<CfbCommentBean> list = cfbCommentDao.getCfbCommentBycfbId(pageNumber, 6, cfbId);
+        Page page = new Page(pageNumber, count, 6, list);
+        PageTool pt = new PageTool();
+        this.pageTools = pt.getPageStringForjs("/bids/respondBidsComment!respondComments.action", page);
+        this.lists = page.getResult();
+        return "respondComments";
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getPageTools() {
+        return pageTools;
+    }
+
+    public void setPageTools(String pageTools) {
+        this.pageTools = pageTools;
+    }
+
+    public Integer getCfbId() {
+        return cfbId;
+    }
+
+    public void setCfbId(Integer cfbId) {
+        this.cfbId = cfbId;
+    }
+
+    public List<CfbCommentBean> getLists() {
+        return lists;
+    }
+
+    public void setLists(List<CfbCommentBean> lists) {
+        this.lists = lists;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getCfbStatus() {
+        return cfbStatus;
+    }
+
+    public void setCfbStatus(String cfbStatus) {
+        this.cfbStatus = cfbStatus;
+    }
+}

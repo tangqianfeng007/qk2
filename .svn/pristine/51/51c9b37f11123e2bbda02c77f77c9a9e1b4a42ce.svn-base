@@ -1,0 +1,266 @@
+package com.qk.dao.impl;
+
+import com.qk.bean.SiteCommentBean;
+import com.qk.dao.SiteCommentDao;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-6
+ * Time: 上午10:32
+ * To change this template use File | Settings | File Templates.
+ */
+public class SiteCommentDaoImp implements SiteCommentDao {
+
+    private DataSource dataSource;
+
+    private PreparedStatement preparedStatement;
+
+    public SiteCommentDaoImp(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Override
+    public List commentTopTen() {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        List list = new ArrayList();
+        String sql = "select  * from site_comment  where ROWNUM <= 5  order by sc_count desc";
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                SiteCommentBean siteCommentBean = new SiteCommentBean();
+                siteCommentBean.setScId(resultSet.getInt("sc_id"));
+                siteCommentBean.setScTitle(resultSet.getString("sc_title"));
+                siteCommentBean.setScCount(resultSet.getInt("sc_count"));
+                siteCommentBean.setScRemark(resultSet.getString("SC_REMARK"));
+                list.add(siteCommentBean);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public SiteCommentBean infoFindById(int id) {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        SiteCommentBean siteCommentBean = null;
+        String sql = "select * from site_comment where sc_id = ?";
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1, id);
+            resultSet = this.preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                siteCommentBean = new SiteCommentBean();
+                siteCommentBean.setScId(resultSet.getInt("sc_id"));
+                siteCommentBean.setUserId(resultSet.getInt("user_id"));
+                siteCommentBean.setScTitle(resultSet.getString("sc_title"));
+                siteCommentBean.setScContent(resultSet.getString("sc_content"));
+                siteCommentBean.setScCount(resultSet.getInt("sc_count"));
+                siteCommentBean.setScPosted(resultSet.getString("SC_POSTED"));
+                siteCommentBean.setScRemark(resultSet.getString("SC_REMARK"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return siteCommentBean;
+    }
+
+    @Override
+    public void updateClickCount(int offset, int id) {
+        Connection connection = null;
+        String sql = "update site_comment set sc_count= sc_count+? WHERE sc_id=?";
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1, offset);
+            this.preparedStatement.setInt(2, id);
+            this.preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getCount(int id) {
+        int count = 0;
+        ResultSet resultSet = null;
+        Connection connection = null;
+        String sql = null;
+        if (id > 0) {
+            sql = "select count(*) as countNum from site_comment where user_id=" + id;
+        } else {
+            sql = "select count(*) as countNum from site_comment";
+        }
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("countNum");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public List<SiteCommentBean> getList(Integer pageNumber, Integer pageSize, int id) {
+        ResultSet resultSet = null;
+        Connection connection = null;
+        List<SiteCommentBean> list = new ArrayList<SiteCommentBean>();
+        String sql = null;
+        if (id > 0) {
+            sql = "SELECT * FROM (" +
+                    "SELECT ROWNUM AS rn, t.* FROM   (" +
+                    "SELECT * FROM site_comment where user_id= " + id + "ORDER BY sc_posted DESC) t) " +
+                    "WHERE rn BETWEEN " + ((pageNumber - 1) * pageSize + 1) + " AND " + (pageNumber * pageSize);
+        } else {
+            sql = "SELECT * FROM (" +
+                    "SELECT ROWNUM AS rn, t.* FROM   (" +
+                    "SELECT * FROM site_comment ORDER BY sc_posted DESC) t) " +
+                    "WHERE rn BETWEEN " + ((pageNumber - 1) * pageSize + 1) + " AND " + (pageNumber * pageSize);
+        }
+        try {
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            resultSet = this.preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                SiteCommentBean siteCommentBean = new SiteCommentBean();
+                siteCommentBean.setScId(resultSet.getInt("sc_id"));
+                siteCommentBean.setUserId(resultSet.getInt("user_id"));
+                siteCommentBean.setScTitle(resultSet.getString("sc_title"));
+                siteCommentBean.setScContent(resultSet.getString("sc_content"));
+                siteCommentBean.setScCount(resultSet.getInt("sc_count"));
+                siteCommentBean.setScPosted(resultSet.getString("SC_POSTED"));
+                siteCommentBean.setScRemark(resultSet.getString("SC_REMARK"));
+                list.add(siteCommentBean);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public Integer insertSiteCommentBean(SiteCommentBean siteCommentBean) {
+        Connection connection = null;
+        int key = -1;
+        String sql = "insert into SITE_COMMENT(SC_ID,USER_ID,SC_TITLE,SC_CONTENT," +
+                "SC_COUNT,SC_POSTED,SC_REMARK) values " +
+                "(SITE_COMMENT_seq.NEXTVAL,?,?,?,?,?,?)";
+        ResultSet resultSet = null;
+        try {
+            System.out.println(sql);
+            connection = dataSource.getConnection();
+            this.preparedStatement = connection.prepareStatement(sql);
+            this.preparedStatement.setInt(1, siteCommentBean.getUserId());
+            this.preparedStatement.setString(2, siteCommentBean.getScTitle());
+            this.preparedStatement.setString(3, siteCommentBean.getScContent());
+            this.preparedStatement.setInt(4, siteCommentBean.getScCount());
+            this.preparedStatement.setString(5, siteCommentBean.getScPosted());
+            this.preparedStatement.setString(6, siteCommentBean.getScRemark());
+            key = this.preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return key;
+    }
+
+    @Override
+    public Integer deleteCommentBean(Integer scId) {
+        Connection connection = null;
+        int key = -1;
+        String sql = "delete from SITE_COMMENT t1 where t1.SC_ID=" + scId;
+        ResultSet resultSet = null;
+        try {
+            System.out.println(sql);
+            connection = dataSource.getConnection();
+            Statement statement = connection.createStatement();
+            key = statement.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (this.preparedStatement != null) {
+                try {
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
+                } catch (Exception e) {
+
+                }
+            }
+        }
+        return key;
+    }
+}

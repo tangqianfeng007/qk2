@@ -1,0 +1,146 @@
+package com.qk.bean;
+
+import java.io.Serializable;
+
+public class QkNewsBean implements Serializable {
+    private Integer newsId;
+
+    private Integer userId;
+
+    private String newsTitle;
+
+    private String newsSource;
+
+    private String newsKeywords;
+
+    private String newsDetails;
+
+    private String newsPosted;
+
+    private Integer newsCount;
+
+    private String newsRemark;
+
+    private String username = "";
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    private static final long serialVersionUID = 1L;
+
+    public Integer getNewsId() {
+        return newsId;
+    }
+
+    public void setNewsId(Integer newsId) {
+        this.newsId = newsId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getNewsTitle() {
+        return newsTitle;
+    }
+
+    public void setNewsTitle(String newsTitle) {
+        this.newsTitle = newsTitle == null ? null : newsTitle.trim();
+    }
+
+    public String getNewsSource() {
+        return newsSource;
+    }
+
+    public void setNewsSource(String newsSource) {
+        this.newsSource = newsSource == null ? null : newsSource.trim();
+    }
+
+    public String getNewsKeywords() {
+        return newsKeywords;
+    }
+
+    public void setNewsKeywords(String newsKeywords) {
+        this.newsKeywords = newsKeywords == null ? null : newsKeywords.trim();
+    }
+
+    public String getNewsDetails() {
+        return newsDetails;
+    }
+
+    public void setNewsDetails(String newsDetails) {
+        this.newsDetails = newsDetails == null ? null : newsDetails.trim();
+    }
+
+    public String getNewsPosted() {
+        return newsPosted;
+    }
+
+    public void setNewsPosted(String newsPosted) {
+        this.newsPosted = newsPosted == null ? null : newsPosted.trim();
+    }
+
+    public Integer getNewsCount() {
+        return newsCount;
+    }
+
+    public void setNewsCount(Integer newsCount) {
+        this.newsCount = newsCount;
+    }
+
+    public String getNewsRemark() {
+        return newsRemark;
+    }
+
+    public void setNewsRemark(String newsRemark) {
+        this.newsRemark = newsRemark == null ? null : newsRemark.trim();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) {
+            return true;
+        }
+        if (that == null) {
+            return false;
+        }
+        if (getClass() != that.getClass()) {
+            return false;
+        }
+        QkNewsBean other = (QkNewsBean) that;
+        return (this.getNewsId() == null ? other.getNewsId() == null : this.getNewsId().equals(other.getNewsId()))
+                && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+                && (this.getNewsTitle() == null ? other.getNewsTitle() == null : this.getNewsTitle().equals(other.getNewsTitle()))
+                && (this.getNewsSource() == null ? other.getNewsSource() == null : this.getNewsSource().equals(other.getNewsSource()))
+                && (this.getNewsKeywords() == null ? other.getNewsKeywords() == null : this.getNewsKeywords().equals(other.getNewsKeywords()))
+                && (this.getNewsDetails() == null ? other.getNewsDetails() == null : this.getNewsDetails().equals(other.getNewsDetails()))
+                && (this.getNewsPosted() == null ? other.getNewsPosted() == null : this.getNewsPosted().equals(other.getNewsPosted()))
+                && (this.getNewsCount() == null ? other.getNewsCount() == null : this.getNewsCount().equals(other.getNewsCount()))
+                && (this.getNewsRemark() == null ? other.getNewsRemark() == null : this.getNewsRemark().equals(other.getNewsRemark()));
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getNewsId() == null) ? 0 : getNewsId().hashCode());
+        result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
+        result = prime * result + ((getNewsTitle() == null) ? 0 : getNewsTitle().hashCode());
+        result = prime * result + ((getNewsSource() == null) ? 0 : getNewsSource().hashCode());
+        result = prime * result + ((getNewsKeywords() == null) ? 0 : getNewsKeywords().hashCode());
+        result = prime * result + ((getNewsDetails() == null) ? 0 : getNewsDetails().hashCode());
+        result = prime * result + ((getNewsPosted() == null) ? 0 : getNewsPosted().hashCode());
+        result = prime * result + ((getNewsCount() == null) ? 0 : getNewsCount().hashCode());
+        result = prime * result + ((getNewsRemark() == null) ? 0 : getNewsRemark().hashCode());
+        return result;
+    }
+}

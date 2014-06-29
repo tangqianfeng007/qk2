@@ -1,0 +1,16 @@
+driverClassName=oracle.jdbc.driver.OracleDriver
+url=jdbc:oracle:thin:@172.22.12.32:1521:ORCL
+username=qk
+password=beyond
+filters=stat
+initialSize=2
+maxActive=300
+maxWait=60000
+timeBetweenEvictionRunsMillis=60000
+minEvictableIdleTimeMillis=300000
+validationQuery=SELECT 1 FROM DUAL
+testWhileIdle=true
+testOnBorrow=false
+testOnReturn=false
+poolPreparedStatements=false
+maxPoolPreparedStatementPerConnectionSize=200

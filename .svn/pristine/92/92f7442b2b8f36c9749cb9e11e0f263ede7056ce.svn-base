@@ -1,0 +1,119 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.qk.bean.PublicationsBean;
+import com.qk.bean.User;
+import com.qk.common.Page;
+import com.qk.common.PageTool;
+import com.qk.dao.DaoFactory;
+import com.qk.dao.PublicationDao;
+
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Administrator
+ * Date: 13-8-8
+ * Time: 上午9:21
+ * To change this template use File | Settings | File Templates.
+ */
+public class PubsAction extends ActionSupport {
+    private int id;
+    private  PublicationsBean pubs;
+
+    /**
+     * pageNumber代表是哪一页
+     * pageSize代表一页中显示多少条数据
+     */
+    private int pageNumber=1;
+    private int pageSize=10;
+    private List<PublicationsBean> list=null;
+    private String pageTools=null;
+
+    public String get()
+    {
+        if(id > 0)
+        {
+            DaoFactory.publicationDao.updateClickCount(1,id);
+            pubs = DaoFactory.publicationDao.infoFindById(id);
+        }
+        return SUCCESS;
+    }
+
+    public String getPubsList()
+    {
+        PublicationDao publicationDao=DaoFactory.publicationDao;
+        int count=publicationDao.getCount(0);
+        list=publicationDao.getList(pageNumber,pageSize,0);
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        pageTools = pt.getPageString("/pubs/getPubsList.action", page);
+        return SUCCESS;
+    }
+
+    public  String getPersonPubsList(){
+        User user = (User) ActionContext.getContext().getSession().get("msg");
+        int useid = user.getId();
+        PublicationDao publicationDao=DaoFactory.publicationDao;
+        int count=publicationDao.getCount(useid);
+        list=publicationDao.getList(pageNumber,pageSize,useid);
+        Page page = new Page(pageNumber, count, pageSize, list);
+        PageTool pt = new PageTool();
+        pageTools = pt.getPageString("/pubs/getPubsList.action", page);
+        return "success";
+    }
+
+    public String pubsChange(){
+        pubs = DaoFactory.publicationDao.infoFindById(id);
+        return "success";
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public PublicationsBean getPubs() {
+        return pubs;
+    }
+
+    public void setPubs(PublicationsBean pubs) {
+        this.pubs = pubs;
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public List<PublicationsBean> getList() {
+        return list;
+    }
+
+    public void setList(List<PublicationsBean> list) {
+        this.list = list;
+    }
+
+    public String getPageTools() {
+        return pageTools;
+    }
+
+    public void setPageTools(String pageTools) {
+        this.pageTools = pageTools;
+    }
+}

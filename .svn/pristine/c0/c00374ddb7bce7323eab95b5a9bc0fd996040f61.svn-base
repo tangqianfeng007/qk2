@@ -1,0 +1,94 @@
+package com.qk.action;
+
+import com.opensymphony.xwork2.ActionSupport;
+import com.qk.bean.EventBean;
+import com.qk.bean.PublicationsBean;
+import com.qk.bean.SiteCommentBean;
+import com.qk.bean.User;
+import com.qk.dao.DaoFactory;
+
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: zheng
+ * Date: 13-8-7
+ * Time: 上午9:48
+ * To change this template use File | Settings | File Templates.
+ */
+public class StaticAction extends ActionSupport{
+
+    private List<EventBean> eventList;
+    private List<PublicationsBean> pubList;
+    private List<User> expertList;
+    private List<SiteCommentBean> comList;
+    public String getRight()
+    {
+        String title="";
+        eventList = DaoFactory.eventDao.eventsTopTen();
+        for(EventBean eventBean:eventList){
+            title = eventBean.getEventTitle();
+            if(title.length()>=8){
+                eventBean.setEventTitle(title.substring(0,6)+"...");
+            }
+        }
+
+        pubList = DaoFactory.publicationDao.publicationsTopTen();
+        for(PublicationsBean pubBean:pubList){
+            title = pubBean.getPubTitle();
+            if(title.length()>=8){
+                pubBean.setPubTitle(title.substring(0, 6) + "...");
+            }
+        }
+
+        expertList = DaoFactory.userDao.expertTopTen();
+        for(User user:expertList){
+            String name = user.getUsername();
+            if(name.length()>=8){
+                user.setUsername(name.substring(0, 6) + "...");
+            }
+        }
+
+        comList = DaoFactory.siteCommentDao.commentTopTen();
+        for(SiteCommentBean siteCommentBean:comList){
+            title = siteCommentBean.getScTitle();
+            if(title.length()>=8){
+                siteCommentBean.setScTitle(title.substring(0, 6) + "...");
+            }
+        }
+
+        return SUCCESS;
+    }
+
+    public List<EventBean> getEventList() {
+        return eventList;
+    }
+
+    public void setEventList(List<EventBean> eventList) {
+        this.eventList = eventList;
+    }
+
+    public List<PublicationsBean> getPubList() {
+        return pubList;
+    }
+
+    public void setPubList(List<PublicationsBean> pubList) {
+        this.pubList = pubList;
+    }
+
+    public List<User> getExpertList() {
+        return expertList;
+    }
+
+    public void setExpertList(List<User> expertList) {
+        this.expertList = expertList;
+    }
+
+    public List<SiteCommentBean> getComList() {
+        return comList;
+    }
+
+    public void setComList(List<SiteCommentBean> comList) {
+        this.comList = comList;
+    }
+}

@@ -1,0 +1,148 @@
+package com.qk.bean;
+
+import java.io.Serializable;
+
+public class EventBean implements Serializable {
+    private Integer eventId;
+
+    private Integer userId;
+
+    private String eventTitle;
+
+    private String eventKeywords;
+
+    private String eventDate;
+
+    private String eventPosted;
+
+    private String eventLocation;
+
+    private String eventSummary;
+
+    private Integer eventCount;
+
+    private String eventRemark;
+
+    private static final long serialVersionUID = 1L;
+
+    public Integer getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Integer eventId) {
+        this.eventId = eventId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getEventTitle() {
+        return eventTitle;
+    }
+
+    public void setEventTitle(String eventTitle) {
+        this.eventTitle = eventTitle == null ? null : eventTitle.trim();
+    }
+
+    public String getEventKeywords() {
+        return eventKeywords;
+    }
+
+    public void setEventKeywords(String eventKeywords) {
+        this.eventKeywords = eventKeywords == null ? null : eventKeywords.trim();
+    }
+
+    public String getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(String eventDate) {
+        this.eventDate = eventDate == null ? null : eventDate.trim();
+    }
+
+    public String getEventPosted() {
+        return eventPosted;
+    }
+
+    public void setEventPosted(String eventPosted) {
+        this.eventPosted = eventPosted == null ? null : eventPosted.trim();
+    }
+
+    public String getEventLocation() {
+        return eventLocation;
+    }
+
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation == null ? null : eventLocation.trim();
+    }
+
+    public String getEventSummary() {
+        return eventSummary;
+    }
+
+    public void setEventSummary(String eventSummary) {
+        this.eventSummary = eventSummary == null ? null : eventSummary.trim();
+    }
+
+    public Integer getEventCount() {
+        return eventCount;
+    }
+
+    public void setEventCount(Integer eventCount) {
+        this.eventCount = eventCount;
+    }
+
+    public String getEventRemark() {
+        return eventRemark;
+    }
+
+    public void setEventRemark(String eventRemark) {
+        this.eventRemark = eventRemark == null ? null : eventRemark.trim();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) {
+            return true;
+        }
+        if (that == null) {
+            return false;
+        }
+        if (getClass() != that.getClass()) {
+            return false;
+        }
+        EventBean other = (EventBean) that;
+        return (this.getEventId() == null ? other.getEventId() == null : this.getEventId().equals(other.getEventId()))
+            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+            && (this.getEventTitle() == null ? other.getEventTitle() == null : this.getEventTitle().equals(other.getEventTitle()))
+            && (this.getEventKeywords() == null ? other.getEventKeywords() == null : this.getEventKeywords().equals(other.getEventKeywords()))
+            && (this.getEventDate() == null ? other.getEventDate() == null : this.getEventDate().equals(other.getEventDate()))
+            && (this.getEventPosted() == null ? other.getEventPosted() == null : this.getEventPosted().equals(other.getEventPosted()))
+            && (this.getEventLocation() == null ? other.getEventLocation() == null : this.getEventLocation().equals(other.getEventLocation()))
+            && (this.getEventSummary() == null ? other.getEventSummary() == null : this.getEventSummary().equals(other.getEventSummary()))
+            && (this.getEventCount() == null ? other.getEventCount() == null : this.getEventCount().equals(other.getEventCount()))
+            && (this.getEventRemark() == null ? other.getEventRemark() == null : this.getEventRemark().equals(other.getEventRemark()));
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getEventId() == null) ? 0 : getEventId().hashCode());
+        result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
+        result = prime * result + ((getEventTitle() == null) ? 0 : getEventTitle().hashCode());
+        result = prime * result + ((getEventKeywords() == null) ? 0 : getEventKeywords().hashCode());
+        result = prime * result + ((getEventDate() == null) ? 0 : getEventDate().hashCode());
+        result = prime * result + ((getEventPosted() == null) ? 0 : getEventPosted().hashCode());
+        result = prime * result + ((getEventLocation() == null) ? 0 : getEventLocation().hashCode());
+        result = prime * result + ((getEventSummary() == null) ? 0 : getEventSummary().hashCode());
+        result = prime * result + ((getEventCount() == null) ? 0 : getEventCount().hashCode());
+        result = prime * result + ((getEventRemark() == null) ? 0 : getEventRemark().hashCode());
+        return result;
+    }
+}

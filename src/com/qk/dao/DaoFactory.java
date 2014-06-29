@@ -1,0 +1,70 @@
+package com.qk.dao;
+
+import com.alibaba.druid.pool.DruidDataSourceFactory;
+import com.qk.bean.EnterpriseCommentBean;
+import com.qk.dao.impl.*;
+
+import javax.sql.DataSource;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: lujianbo
+ * Date: 13-8-8
+ * Time: 上午10:03
+ * To change this template use File | Settings | File Templates.
+ */
+public class DaoFactory {
+
+    public static UserDao userDao = null;
+
+    public static PublicationDao publicationDao = null;
+
+    public static EventDao eventDao = null;
+
+    public static CallforbitDao callforbitDao = null;
+
+    public static NewsDao newsDao = null;
+
+    public static RfpInfoDao rfpInfoDao = null;
+
+    public static SiteCommentDao siteCommentDao = null;
+
+    public static CfbCommentDao cfbCommentDao = null;
+
+    public static RfpInfoCommentDao rfpInfoCommentDao = null;
+
+    public static BitResultDao bitResultDao = null;
+
+    public static VirtualTeamDao virtualTeamDao = null;
+
+    public static EnterpriseDao enterpriseDao = null;
+
+    public static EnterpriseCommentDao enterpriseCommentDao = null;
+
+    static {
+        try {
+            Properties p = new Properties();
+            InputStream inputStream = new BufferedInputStream(DaoFactory.class.getResourceAsStream("druid.properties"));
+            p.load(inputStream);
+            DataSource dataSource = DruidDataSourceFactory.createDataSource(p);
+            userDao = new UserDaoImpl(dataSource);
+            publicationDao = new PublicationDaoImp(dataSource);
+            eventDao = new EventDaoImp(dataSource);
+            callforbitDao = new CallforbitDaoImpl(dataSource);
+            newsDao = new NewsDaoImp(dataSource);
+            siteCommentDao = new SiteCommentDaoImp(dataSource);
+            rfpInfoDao = new RfpInfoDaoImp(dataSource);
+            cfbCommentDao = new CfbCommentDaoImpl(dataSource);
+            rfpInfoCommentDao = new RfpInfoCommentDaoImp(dataSource);
+            bitResultDao = new BitResultDaoImpl(dataSource);
+            virtualTeamDao = new VirtualTeamDaoImpl(dataSource);
+            enterpriseDao = new EnterpriseDaoImp(dataSource);
+            enterpriseCommentDao = new EnterpriseCommentDaoImpl(dataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
